@@ -7,708 +7,728 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',sans-serif;background:#0a0a0f;color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
-
-/* HEADER */
-header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.08);z-index:100;flex-shrink:0}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0}
 .logo{font-size:16px;font-weight:700;letter-spacing:2px;color:#e8c87a}
 .logo span{color:#fff;font-weight:300}
 .lang-switcher{display:flex;gap:4px}
 .lang-btn{padding:4px 10px;border-radius:3px;font-size:11px;cursor:pointer;border:1px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);transition:all .2s}
 .lang-btn.active{background:#e8c87a;color:#000;border-color:#e8c87a;font-weight:700}
-.btn{padding:7px 16px;border-radius:4px;font-size:12px;cursor:pointer;border:none;font-weight:600;letter-spacing:.5px;transition:all .2s}
+.btn{padding:7px 16px;border-radius:4px;font-size:12px;cursor:pointer;border:none;font-weight:600;transition:all .2s}
 .btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.3);color:#fff}
 .btn-outline:hover{border-color:#e8c87a;color:#e8c87a}
 .btn-primary{background:#e8c87a;color:#0a0a0f}
 .btn-primary:hover{background:#f0d68a}
-
-/* STEP TABS */
 .steps{display:flex;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;overflow-x:auto}
-.step-tab{padding:10px 18px;font-size:11px;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);letter-spacing:.5px;text-transform:uppercase;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.step-tab{padding:10px 16px;font-size:10px;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);letter-spacing:.5px;text-transform:uppercase;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px}
 .step-tab.active{color:#e8c87a;border-bottom-color:#e8c87a}
 .step-tab.done{color:rgba(255,255,255,0.6)}
-.step-num{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.1);font-size:10px;display:flex;align-items:center;justify-content:center}
+.step-num{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,0.1);font-size:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .step-tab.active .step-num{background:#e8c87a;color:#000}
 .step-tab.done .step-num{background:#4caf50;color:#fff}
-
-/* MAIN */
 .main{display:flex;flex:1;overflow:hidden}
-.viewport{flex:1;position:relative}
-canvas{width:100%;height:100%;display:block}
 
+/* VIEWPORT - přepínání 3D/2D */
+.viewport-wrap{flex:1;position:relative;display:flex;flex-direction:column}
+.view-toggle{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;background:rgba(0,0,0,0.6);border-radius:6px;overflow:hidden;z-index:20;backdrop-filter:blur(10px)}
+.vtoggle-btn{padding:6px 16px;font-size:11px;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.5);transition:all .2s}
+.vtoggle-btn.active{background:#e8c87a;color:#0a0a0f;font-weight:700}
+.view-3d{flex:1;position:relative}
+.view-2d{flex:1;display:none;background:#111118;overflow:hidden;align-items:center;justify-content:center}
+.view-2d.visible{display:flex}
+canvas{width:100%;height:100%;display:block}
 .loading-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0f;gap:12px;z-index:10}
 .spinner{width:40px;height:40px;border:3px solid rgba(232,200,122,0.2);border-top-color:#e8c87a;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-.view-btns{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+.view-btns{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
 .vbtn{background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:6px 12px;border-radius:3px;cursor:pointer;font-size:11px;backdrop-filter:blur(10px);transition:all .2s}
 .vbtn:hover{border-color:#e8c87a;color:#e8c87a}
 
 /* PANEL */
-.panel{width:320px;background:rgba(255,255,255,0.03);border-left:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;overflow:hidden}
-.panel-content{flex:1;overflow-y:auto;padding:16px}
+.panel{width:300px;background:rgba(255,255,255,0.03);border-left:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;overflow:hidden}
+.panel-content{flex:1;overflow-y:auto;padding:14px}
 .panel-content::-webkit-scrollbar{width:3px}
-.panel-content::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+.panel-content::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1)}
+.sec{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.35);text-transform:uppercase;margin-bottom:10px;margin-top:14px}
+.sec:first-child{margin-top:0}
 
-.section-title{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.35);text-transform:uppercase;margin-bottom:12px;margin-top:16px}
-.section-title:first-child{margin-top:0}
-
-/* COLOR */
 .color-grid{display:flex;flex-wrap:wrap;gap:6px}
-.swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.swatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s}
 .swatch:hover{transform:scale(1.1)}
 .swatch.active{border-color:#e8c87a;box-shadow:0 0 0 2px rgba(232,200,122,0.3)}
 .sel-label{font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px}
 
-/* OPTION CARDS */
-.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.opt-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:10px;cursor:pointer;transition:all .2s;text-align:center}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.opt-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px;cursor:pointer;transition:all .2s;text-align:center}
 .opt-card:hover{border-color:rgba(232,200,122,0.4)}
 .opt-card.active{border-color:#e8c87a;background:rgba(232,200,122,0.08)}
-.opt-card .icon{font-size:22px;margin-bottom:4px}
-.opt-card .name{font-size:11px;color:rgba(255,255,255,0.8);font-weight:600}
-.opt-card .desc{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;line-height:1.3}
-.opt-card .price{font-size:10px;color:#e8c87a;margin-top:4px}
+.opt-card .icon{font-size:20px;margin-bottom:3px}
+.opt-card .name{font-size:11px;font-weight:600}
+.opt-card .desc{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}
+.opt-card .price{font-size:10px;color:#e8c87a;margin-top:3px}
 
-/* CURRENCY CHECKBOXES */
-.currency-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.currency-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:5px;cursor:pointer;transition:all .2s}
-.currency-item.active{border-color:#e8c87a;background:rgba(232,200,122,0.06)}
-.currency-item .flag{font-size:16px}
-.currency-item .cname{font-size:11px;color:rgba(255,255,255,0.7)}
-.currency-item .csym{font-size:10px;color:rgba(255,255,255,0.4)}
+.cur-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.cur-item{display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:4px;cursor:pointer;transition:all .2s;font-size:11px}
+.cur-item.active{border-color:#e8c87a;background:rgba(232,200,122,0.06)}
 
-/* MACHINE */
-.machine-list{display:flex;flex-direction:column;gap:6px}
-.machine-item{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;cursor:pointer;transition:all .2s}
-.machine-item:hover{border-color:rgba(232,200,122,0.3)}
-.machine-item.active{border-color:#e8c87a;background:rgba(232,200,122,0.06)}
-.machine-item .micon{font-size:20px;width:32px;text-align:center}
-.machine-item .minfo .mname{font-size:12px;font-weight:600}
-.machine-item .minfo .mdesc{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}
-.machine-item .mprice{margin-left:auto;font-size:11px;color:#e8c87a;font-weight:600}
-
-/* STICKER */
-.sticker-zone{background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.15);border-radius:8px;padding:16px;text-align:center;min-height:120px;position:relative;overflow:hidden}
-.sticker-preview{width:100%;height:80px;border-radius:4px;object-fit:cover;margin-bottom:8px}
-.sticker-opts{display:flex;flex-direction:column;gap:6px;margin-top:10px}
-.sticker-row{display:flex;gap:6px;align-items:center}
-.sticker-row label{font-size:10px;color:rgba(255,255,255,0.4);width:70px;flex-shrink:0}
-.sticker-select{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer}
-.sticker-select option{background:#1a1a2e}
-.color-input{width:32px;height:24px;border:none;border-radius:3px;cursor:pointer;padding:0}
-
-/* SUMMARY */
-.summary-panel{background:rgba(255,255,255,0.03);border-top:1px solid rgba(255,255,255,0.08);padding:12px 16px;flex-shrink:0}
-.sum-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:rgba(255,255,255,0.5)}
-.sum-row.total{color:#fff;font-weight:700;font-size:13px;border-top:1px solid rgba(255,255,255,0.1);margin-top:6px;padding-top:6px}
-.price-val{color:#e8c87a}
-
-/* MESH TOGGLES */
-.mesh-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
-.mesh-name{font-size:11px;color:rgba(255,255,255,0.6)}
-.toggle{width:32px;height:18px;background:rgba(255,255,255,0.1);border-radius:9px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0}
-.toggle.on{background:#e8c87a}
-.toggle::after{content:'';position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s}
-.toggle.on::after{left:17px}
-
-/* LANG STEP */
-.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.lang-card{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:5px;cursor:pointer;transition:all .2s}
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.lang-card{display:flex;align-items:center;gap:6px;padding:7px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:4px;cursor:pointer;transition:all .2s}
 .lang-card.active{border-color:#e8c87a;background:rgba(232,200,122,0.06)}
-.lang-card.primary-lang{border-color:#4caf50;background:rgba(76,175,80,0.08)}
-.lang-flag{font-size:18px}
-.lang-name{font-size:11px;color:rgba(255,255,255,0.7)}
-.lang-badge{font-size:9px;padding:1px 5px;border-radius:3px;margin-left:auto}
-.badge-primary{background:#4caf50;color:#fff}
-.badge-selected{background:#e8c87a;color:#000}
+.lang-card.primary{border-color:#4caf50;background:rgba(76,175,80,0.08)}
+.lang-badge{font-size:9px;padding:1px 4px;border-radius:2px;margin-left:auto}
+.badge-p{background:#4caf50;color:#fff}
+.badge-s{background:#e8c87a;color:#000}
 
-.mat-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.mat-tab{padding:5px 10px;border-radius:3px;font-size:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.5);transition:all .2s}
+.mach-list{display:flex;flex-direction:column;gap:5px}
+.mach-item{display:flex;align-items:center;gap:8px;padding:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:5px;cursor:pointer;transition:all .2s}
+.mach-item:hover{border-color:rgba(232,200,122,0.3)}
+.mach-item.active{border-color:#e8c87a;background:rgba(232,200,122,0.06)}
+.mach-item .mi{font-size:18px;width:28px;text-align:center}
+.mach-item .mn{font-size:11px;font-weight:600}
+.mach-item .md{font-size:10px;color:rgba(255,255,255,0.4)}
+.mach-item .mp{margin-left:auto;font-size:10px;color:#e8c87a;font-weight:600;white-space:nowrap}
+
+/* STICKER CONFIG */
+.stk-opts{display:flex;flex-direction:column;gap:6px}
+.stk-row{display:flex;align-items:center;gap:8px;padding:4px 0}
+.stk-row label{font-size:10px;color:rgba(255,255,255,0.4);width:80px;flex-shrink:0}
+.stk-select{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:4px 8px;border-radius:4px;font-size:11px}
+.stk-select option{background:#1a1a2e}
+.color-inp{width:32px;height:24px;border:1px solid rgba(255,255,255,0.2);border-radius:3px;cursor:pointer;padding:0}
+.stk-text-inp{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:4px 8px;border-radius:4px;font-size:11px}
+.stk-text-inp::placeholder{color:rgba(255,255,255,0.3)}
+
+.mat-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.mat-tab{padding:4px 10px;border-radius:3px;font-size:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.5);transition:all .2s}
 .mat-tab.active{background:rgba(232,200,122,0.12);border-color:#e8c87a;color:#e8c87a}
 
-.nav-btns{display:flex;gap:8px;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0}
+.mesh-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.mesh-name{font-size:11px;color:rgba(255,255,255,0.6)}
+.toggle{width:30px;height:17px;background:rgba(255,255,255,0.1);border-radius:9px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:#e8c87a}
+.toggle::after{content:'';position:absolute;width:11px;height:11px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s}
+.toggle.on::after{left:16px}
+
+.sum-panel{background:rgba(255,255,255,0.03);border-top:1px solid rgba(255,255,255,0.08);padding:10px 14px;flex-shrink:0}
+.sum-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:rgba(255,255,255,0.5)}
+.sum-row.total{color:#fff;font-weight:700;font-size:13px;border-top:1px solid rgba(255,255,255,0.1);margin-top:5px;padding-top:5px}
+.pv{color:#e8c87a}
+.nav-btns{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0}
 .nav-btns .btn{flex:1;text-align:center}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">BS<span> konfigurátor</span></div>
-  <div class="lang-switcher" id="ui-lang-switcher">
-    <button class="lang-btn active" onclick="setUILang('cs')">CS</button>
-    <button class="lang-btn" onclick="setUILang('en')">EN</button>
-    <button class="lang-btn" onclick="setUILang('de')">DE</button>
+  <div class="lang-switcher">
+    <button class="lang-btn active" onclick="setLang('cs')">CS</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('de')">DE</button>
   </div>
-  <div style="display:flex;gap:8px">
-    <span id="hdr-info" style="font-size:11px;color:rgba(255,255,255,0.35);line-height:2"></span>
-    <button class="btn btn-primary" onclick="showSummaryModal()" data-t="save">Uložit konfiguraci</button>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span id="hdr-info" style="font-size:11px;color:rgba(255,255,255,0.3)"></span>
+    <button class="btn btn-primary" onclick="showModal()">Uložit konfiguraci</button>
   </div>
 </header>
-
 <div class="steps" id="steps"></div>
-
 <div class="main">
-  <div class="viewport">
-    <canvas id="canvas"></canvas>
-    <div class="loading-overlay" id="loading">
-      <div class="spinner"></div>
-      <div id="loading-text" style="font-size:13px;color:rgba(255,255,255,0.4)">Načítám model...</div>
+  <div class="viewport-wrap">
+    <!-- Přepínač 3D/2D -->
+    <div class="view-toggle">
+      <button class="vtoggle-btn active" id="btn3d" onclick="switchView('3d')">3D model</button>
+      <button class="vtoggle-btn" id="btn2d" onclick="switchView('2d')">2D náhled polepů</button>
     </div>
-    <div class="view-btns">
-      <button class="vbtn" onclick="setView('front')" data-t="front">Přední</button>
-      <button class="vbtn" onclick="setView('side')" data-t="side">Boční</button>
-      <button class="vbtn" onclick="setView('top')" data-t="top">Shora</button>
-      <button class="vbtn" onclick="setView('iso')" data-t="iso">Izometrický</button>
+    <!-- 3D -->
+    <div class="view-3d" id="view3d">
+      <canvas id="canvas"></canvas>
+      <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+        <div id="ltxt" style="font-size:13px;color:rgba(255,255,255,0.4)">Načítám model...</div>
+      </div>
+      <div class="view-btns">
+        <button class="vbtn" onclick="setView('front')">Přední</button>
+        <button class="vbtn" onclick="setView('side')">Boční</button>
+        <button class="vbtn" onclick="setView('top')">Shora</button>
+        <button class="vbtn" onclick="setView('iso')">Izometrický</button>
+      </div>
+    </div>
+    <!-- 2D vizualizace -->
+    <div class="view-2d" id="view2d">
+      <canvas id="canvas2d" style="max-width:700px;max-height:100%;width:100%"></canvas>
     </div>
   </div>
-
   <div class="panel">
     <div class="panel-content" id="panel-content"></div>
-    <div class="summary-panel" id="summary-panel"></div>
+    <div class="sum-panel" id="sum-panel"></div>
     <div class="nav-btns">
-      <button class="btn btn-outline" id="btn-prev" onclick="prevStep()" data-t="prev">← Zpět</button>
-      <button class="btn btn-primary" id="btn-next" onclick="nextStep()" data-t="next">Další →</button>
+      <button class="btn btn-outline" id="btn-prev" onclick="prevStep()">← Zpět</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextStep()">Další →</button>
     </div>
   </div>
 </div>
 
-<!-- SUMMARY MODAL -->
+<!-- MODAL -->
 <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:999;align-items:center;justify-content:center">
-  <div style="background:#12121e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:32px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto">
-    <h2 style="color:#e8c87a;margin-bottom:20px;font-size:18px" data-t="config_sum">Souhrn konfigurace</h2>
+  <div style="background:#12121e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:28px;max-width:460px;width:90%;max-height:80vh;overflow-y:auto">
+    <h2 style="color:#e8c87a;margin-bottom:16px;font-size:17px">Souhrn konfigurace</h2>
     <div id="modal-content"></div>
-    <div style="display:flex;gap:10px;margin-top:20px">
-      <button class="btn btn-outline" style="flex:1" onclick="document.getElementById('modal').style.display='none'" data-t="close">Zavřít</button>
-      <button class="btn btn-primary" style="flex:1" onclick="downloadConfig()" data-t="download">Stáhnout PDF</button>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="document.getElementById('modal').style.display='none'">Zavřít</button>
+      <button class="btn btn-primary" style="flex:1" onclick="dlConfig()">Stáhnout souhrn</button>
     </div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// ═══════════════════════════════════════════════
-// TRANSLATIONS
-// ═══════════════════════════════════════════════
-const T = {
-  cs:{
-    steps:['Barva & Materiál','Akceptory','Měna','Jazyk displeje','Typ stroje','Polepy','Souhrn'],
-    front:'Přední',side:'Boční',top:'Shora',iso:'Izometrický',
-    save:'Uložit konfiguraci',prev:'← Zpět',next:'Další →',
-    color_surface:'Barva povrchu',material_type:'Typ materiálu',components:'Komponenty',
-    acceptors:'Akceptory platby',currency:'Akceptovaná měna',
-    lang_display:'Jazyky na displeji',lang_hint:'Vyberte hlavní jazyk a až 5 dalších (celkem 6)',
-    machine_type:'Typ stroje / vybavení',
-    sticker:'Konfigurátor polepů',sticker_hint:'Navrhněte vlastní polepy kiosku',
-    summary:'Konfigurace & cena',base:'Základní cena',total:'Celkem',
-    config_sum:'Souhrn konfigurace',close:'Zavřít',download:'Stáhnout PDF',
-    primary:'Hlavní',selected:'Vybráno',
-    mat_std:'Standardní',mat_mat:'Matný lak',mat_gloss:'Lesk',mat_metal:'Kov',
-  },
-  en:{
-    steps:['Color & Material','Acceptors','Currency','Display Language','Machine Type','Stickers','Summary'],
-    front:'Front',side:'Side',top:'Top',iso:'Isometric',
-    save:'Save configuration',prev:'← Back',next:'Next →',
-    color_surface:'Surface color',material_type:'Material type',components:'Components',
-    acceptors:'Payment acceptors',currency:'Accepted currency',
-    lang_display:'Display languages',lang_hint:'Select primary language and up to 5 more (total 6)',
-    machine_type:'Machine type / equipment',
-    sticker:'Sticker configurator',sticker_hint:'Design your kiosk stickers',
-    summary:'Configuration & price',base:'Base price',total:'Total',
-    config_sum:'Configuration summary',close:'Close',download:'Download PDF',
-    primary:'Primary',selected:'Selected',
-    mat_std:'Standard',mat_mat:'Matte lacquer',mat_gloss:'Glossy',mat_metal:'Metal',
-  },
-  de:{
-    steps:['Farbe & Material','Akzeptoren','Währung','Display-Sprache','Maschinentyp','Aufkleber','Zusammenfassung'],
-    front:'Vorne',side:'Seite',top:'Oben',iso:'Isometrisch',
-    save:'Konfiguration speichern',prev:'← Zurück',next:'Weiter →',
-    color_surface:'Oberflächenfarbe',material_type:'Materialtyp',components:'Komponenten',
-    acceptors:'Zahlungsakzeptoren',currency:'Akzeptierte Währung',
-    lang_display:'Display-Sprachen',lang_hint:'Hauptsprache und bis zu 5 weitere wählen (gesamt 6)',
-    machine_type:'Maschinentyp / Ausstattung',
-    sticker:'Aufkleber-Konfigurator',sticker_hint:'Gestalten Sie Ihre Kiosk-Aufkleber',
-    summary:'Konfiguration & Preis',base:'Grundpreis',total:'Gesamt',
-    config_sum:'Konfigurationszusammenfassung',close:'Schließen',download:'PDF herunterladen',
-    primary:'Haupt',selected:'Ausgewählt',
-    mat_std:'Standard',mat_mat:'Mattlack',mat_gloss:'Hochglanz',mat_metal:'Metall',
-  }
-};
-let uiLang = 'cs';
-function t(k){ return (T[uiLang]||T.cs)[k] || k; }
-function setUILang(l){
-  uiLang=l;
-  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent===l.toUpperCase()));
-  renderStep();
-  renderSummary();
-  updateNavBtns();
-}
+// ═══════════════ TRANSLATIONS ═══════════════
+const TR={cs:{steps:['Barva & Materiál','Akceptory','Měna','Jazyk displeje','Typ stroje','Polepy','Souhrn'],mat_std:'Standardní',mat_mat:'Matný lak',mat_gloss:'Lesk',mat_metal:'Kov'},en:{steps:['Color & Material','Acceptors','Currency','Display Language','Machine Type','Stickers','Summary'],mat_std:'Standard',mat_mat:'Matte',mat_gloss:'Glossy',mat_metal:'Metal'},de:{steps:['Farbe & Material','Akzeptoren','Währung','Sprache','Maschinentyp','Aufkleber','Zusammenfassung'],mat_std:'Standard',mat_mat:'Matt',mat_gloss:'Hochglanz',mat_metal:'Metall'}};
+let uiLang='cs';
+const t=k=>(TR[uiLang]||TR.cs)[k]||k;
+function setLang(l){uiLang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent===l.toUpperCase()));renderStep();renderSum()}
 
-// ═══════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════
+// ═══════════════ DATA ═══════════════
 const COLORS=[
-  {name:{cs:'Bílá',en:'White',de:'Weiß'},hex:'#f5f5f5',price:0},
-  {name:{cs:'Světle šedá',en:'Light grey',de:'Hellgrau'},hex:'#b0b8c1',price:0},
-  {name:{cs:'Antracit',en:'Anthracite',de:'Anthrazit'},hex:'#3a3d42',price:2000},
-  {name:{cs:'Černá',en:'Black',de:'Schwarz'},hex:'#1a1a1a',price:2000},
-  {name:{cs:'Béžová',en:'Beige',de:'Beige'},hex:'#d4c5a9',price:0},
-  {name:{cs:'Zelená',en:'Green',de:'Grün'},hex:'#4a7c59',price:3000},
-  {name:{cs:'Modrá',en:'Blue',de:'Blau'},hex:'#2c5f8a',price:3000},
-  {name:{cs:'Červená',en:'Red',de:'Rot'},hex:'#8a2c2c',price:3000},
-  {name:{cs:'Zlatá',en:'Gold',de:'Gold'},hex:'#c9a84c',price:5000},
-  {name:{cs:'Stříbrná',en:'Silver',de:'Silber'},hex:'#a8a8a8',price:3000},
+  {n:{cs:'Bílá',en:'White',de:'Weiß'},h:'#f5f5f5',p:0},
+  {n:{cs:'Světle šedá',en:'Light grey',de:'Hellgrau'},h:'#b0b8c1',p:0},
+  {n:{cs:'Antracit',en:'Anthracite',de:'Anthrazit'},h:'#3a3d42',p:2000},
+  {n:{cs:'Černá',en:'Black',de:'Schwarz'},h:'#1a1a1a',p:2000},
+  {n:{cs:'Béžová',en:'Beige',de:'Beige'},h:'#d4c5a9',p:0},
+  {n:{cs:'Zelená',en:'Green',de:'Grün'},h:'#4a7c59',p:3000},
+  {n:{cs:'Modrá',en:'Blue',de:'Blau'},h:'#2c5f8a',p:3000},
+  {n:{cs:'Červená',en:'Red',de:'Rot'},h:'#8a2c2c',p:3000},
+  {n:{cs:'Zlatá',en:'Gold',de:'Gold'},h:'#c9a84c',p:5000},
+  {n:{cs:'Stříbrná',en:'Silver',de:'Silber'},h:'#a8a8a8',p:3000},
 ];
-const MATS=[
-  {key:'std',price:0},{key:'mat',price:5000},{key:'gloss',price:8000},{key:'metal',price:12000}
-];
+const MATS=[{k:'std',p:0},{k:'mat',p:5000},{k:'gloss',p:8000},{k:'metal',p:12000}];
 const ACCEPTORS=[
-  {id:'coin',icon:'🪙',name:{cs:'Mincovník',en:'Coin acceptor',de:'Münzakzeptor'},desc:{cs:'Přijímá mince',en:'Accepts coins',de:'Nimmt Münzen'},price:8000},
-  {id:'bill',icon:'💵',name:{cs:'Bankomatník',en:'Bill acceptor',de:'Banknotenakzeptor'},desc:{cs:'Přijímá bankovky',en:'Accepts banknotes',de:'Nimmt Banknoten'},price:15000},
-  {id:'card',icon:'💳',name:{cs:'Platební terminál',en:'Card terminal',de:'Kartenterminal'},desc:{cs:'Platební karty',en:'Payment cards',de:'Zahlungskarten'},price:12000},
-  {id:'nfc',icon:'📱',name:{cs:'NFC / Mobil',en:'NFC / Mobile',de:'NFC / Mobil'},desc:{cs:'Bezkontaktní',en:'Contactless',de:'Kontaktlos'},price:6000},
-  {id:'qr',icon:'📷',name:{cs:'QR platby',en:'QR payments',de:'QR-Zahlung'},desc:{cs:'QR kód',en:'QR code',de:'QR-Code'},price:4000},
-  {id:'crypto',icon:'₿',name:{cs:'Krypto',en:'Crypto',de:'Krypto'},desc:{cs:'Kryptoměny',en:'Cryptocurrencies',de:'Kryptowährungen'},price:18000},
+  {id:'coin',ic:'🪙',n:{cs:'Mincovník',en:'Coin acceptor',de:'Münzakzeptor'},d:{cs:'Přijímá mince',en:'Coins',de:'Münzen'},p:8000},
+  {id:'bill',ic:'💵',n:{cs:'Bankomatník',en:'Bill acceptor',de:'Banknoten'},d:{cs:'Bankovky',en:'Banknotes',de:'Banknoten'},p:15000},
+  {id:'card',ic:'💳',n:{cs:'Platební terminál',en:'Card terminal',de:'Kartenterminal'},d:{cs:'Platební karty',en:'Cards',de:'Karten'},p:12000},
+  {id:'nfc',ic:'📱',n:{cs:'NFC / Mobil',en:'NFC / Mobile',de:'NFC'},d:{cs:'Bezkontaktní',en:'Contactless',de:'Kontaktlos'},p:6000},
+  {id:'qr',ic:'📷',n:{cs:'QR platby',en:'QR payments',de:'QR-Zahlung'},d:{cs:'QR kód',en:'QR code',de:'QR-Code'},p:4000},
+  {id:'crypto',ic:'₿',n:{cs:'Krypto',en:'Crypto',de:'Krypto'},d:{cs:'Kryptoměny',en:'Crypto',de:'Krypto'},p:18000},
 ];
 const CURRENCIES=[
-  {code:'CZK',flag:'🇨🇿',name:'Koruna',sym:'Kč',price:0},
-  {code:'EUR',flag:'🇪🇺',name:'Euro',sym:'€',price:2000},
-  {code:'USD',flag:'🇺🇸',name:'Dollar',sym:'$',price:2000},
-  {code:'GBP',flag:'🇬🇧',name:'Pound',sym:'£',price:2000},
-  {code:'CHF',flag:'🇨🇭',name:'Franken',sym:'CHF',price:2000},
-  {code:'PLN',flag:'🇵🇱',name:'Złoty',sym:'zł',price:1000},
-  {code:'HUF',flag:'🇭🇺',name:'Forint',sym:'Ft',price:1000},
-  {code:'RON',flag:'🇷🇴',name:'Leu',sym:'lei',price:1000},
-  {code:'SEK',flag:'🇸🇪',name:'Krona',sym:'kr',price:1000},
-  {code:'NOK',flag:'🇳🇴',name:'Krone',sym:'kr',price:1000},
-  {code:'DKK',flag:'🇩🇰',name:'Krone',sym:'kr',price:1000},
-  {code:'HRK',flag:'🇭🇷',name:'Kuna',sym:'kn',price:1000},
+  {c:'CZK',f:'🇨🇿',n:'Koruna',s:'Kč',p:0},{c:'EUR',f:'🇪🇺',n:'Euro',s:'€',p:2000},
+  {c:'USD',f:'🇺🇸',n:'Dollar',s:'$',p:2000},{c:'GBP',f:'🇬🇧',n:'Pound',s:'£',p:2000},
+  {c:'CHF',f:'🇨🇭',n:'Franken',s:'CHF',p:2000},{c:'PLN',f:'🇵🇱',n:'Złoty',s:'zł',p:1000},
+  {c:'HUF',f:'🇭🇺',n:'Forint',s:'Ft',p:1000},{c:'RON',f:'🇷🇴',n:'Leu',s:'lei',p:1000},
+  {c:'SEK',f:'🇸🇪',n:'Krona',s:'kr',p:1000},{c:'NOK',f:'🇳🇴',n:'Krone',s:'kr',p:1000},
+  {c:'DKK',f:'🇩🇰',n:'Krone',s:'kr',p:1000},{c:'HRK',f:'🇭🇷',n:'Kuna',s:'kn',p:1000},
 ];
-const DISPLAY_LANGS=[
-  {code:'cs',flag:'🇨🇿',name:'Čeština'},
-  {code:'sk',flag:'🇸🇰',name:'Slovenčina'},
-  {code:'en',flag:'🇬🇧',name:'English'},
-  {code:'de',flag:'🇩🇪',name:'Deutsch'},
-  {code:'pl',flag:'🇵🇱',name:'Polski'},
-  {code:'hu',flag:'🇭🇺',name:'Magyar'},
-  {code:'ro',flag:'🇷🇴',name:'Română'},
-  {code:'fr',flag:'🇫🇷',name:'Français'},
-  {code:'es',flag:'🇪🇸',name:'Español'},
-  {code:'it',flag:'🇮🇹',name:'Italiano'},
-  {code:'ru',flag:'🇷🇺',name:'Русский'},
-  {code:'ua',flag:'🇺🇦',name:'Українська'},
+const DLANGS=[
+  {c:'cs',f:'🇨🇿',n:'Čeština'},{c:'sk',f:'🇸🇰',n:'Slovenčina'},
+  {c:'en',f:'🇬🇧',n:'English'},{c:'de',f:'🇩🇪',n:'Deutsch'},
+  {c:'pl',f:'🇵🇱',n:'Polski'},{c:'hu',f:'🇭🇺',n:'Magyar'},
+  {c:'ro',f:'🇷🇴',n:'Română'},{c:'fr',f:'🇫🇷',n:'Français'},
+  {c:'es',f:'🇪🇸',n:'Español'},{c:'it',f:'🇮🇹',n:'Italiano'},
+  {c:'ru',f:'🇷🇺',n:'Русский'},{c:'ua',f:'🇺🇦',n:'Українська'},
 ];
 const MACHINES=[
-  {id:'cash',icon:'💰',name:{cs:'Výměna hotovosti',en:'Cash exchange',de:'Bargeldwechsel'},desc:{cs:'Výměna měn, rozměna',en:'Currency exchange, change',de:'Währungstausch'},price:0},
-  {id:'atm',icon:'🏧',name:{cs:'Výběr hotovosti (ATM)',en:'Cash withdrawal (ATM)',de:'Bargeldabhebung (ATM)'},desc:{cs:'Bankomat, výběr',en:'ATM withdrawal',de:'Geldautomat'},price:25000},
-  {id:'topup',icon:'📲',name:{cs:'Dobíjení kreditu',en:'Credit top-up',de:'Guthaben aufladen'},desc:{cs:'Mobil, MHD karty',en:'Mobile, transport cards',de:'Handy, Fahrkarten'},price:10000},
-  {id:'ticket',icon:'🎟️',name:{cs:'Prodej vstupenek',en:'Ticket sales',de:'Fahrkartenverkauf'},desc:{cs:'Vstupenky, jízdenky',en:'Event & transport tickets',de:'Eintrittskarten'},price:15000},
-  {id:'pos',icon:'🛒',name:{cs:'POS Pokladna',en:'POS Register',de:'Kassensystem'},desc:{cs:'Samoobslužná pokladna',en:'Self-checkout',de:'Selbstbedienungskasse'},price:20000},
-  {id:'info',icon:'ℹ️',name:{cs:'Informační kiosek',en:'Info kiosk',de:'Infokiosk'},desc:{cs:'Interaktivní informace',en:'Interactive info',de:'Interaktive Infos'},price:5000},
-];
-const STICKER_LAYOUTS=[
-  {id:'blank',name:{cs:'Bez polepu',en:'No sticker',de:'Ohne Aufkleber'},price:0},
-  {id:'logo_top',name:{cs:'Logo nahoře',en:'Logo top',de:'Logo oben'},price:3000},
-  {id:'full_wrap',name:{cs:'Celoplošný polep',en:'Full wrap',de:'Vollfolierung'},price:12000},
-  {id:'front_panel',name:{cs:'Přední panel',en:'Front panel',de:'Frontpanel'},price:6000},
-  {id:'sides',name:{cs:'Boční pásy',en:'Side strips',de:'Seitenstreifen'},price:4000},
-  {id:'custom',name:{cs:'Na míru',en:'Custom',de:'Individuell'},price:18000},
+  {id:'laundry',ic:'👕',n:{cs:'Prádlomat',en:'Laundromat',de:'Waschsalon'},d:{cs:'Pračky a sušičky',en:'Washers & dryers',de:'Waschmaschinen'},p:0},
+  {id:'cash',ic:'💰',n:{cs:'Výměna hotovosti',en:'Cash exchange',de:'Geldwechsel'},d:{cs:'Výměna měn',en:'Currency exchange',de:'Währung'},p:0},
+  {id:'atm',ic:'🏧',n:{cs:'Bankomat (ATM)',en:'ATM',de:'Geldautomat'},d:{cs:'Výběr hotovosti',en:'Cash withdrawal',de:'Bargeld'},p:25000},
+  {id:'topup',ic:'📲',n:{cs:'Dobíjení kreditu',en:'Top-up',de:'Aufladen'},d:{cs:'Mobil, MHD karty',en:'Mobile, transit',de:'Handy, Tickets'},p:10000},
+  {id:'ticket',ic:'🎟️',n:{cs:'Prodej vstupenek',en:'Tickets',de:'Fahrkarten'},d:{cs:'Vstupenky, jízdenky',en:'Event tickets',de:'Eintrittskarten'},p:15000},
+  {id:'pos',ic:'🛒',n:{cs:'POS Pokladna',en:'POS',de:'Kassensystem'},d:{cs:'Samoobslužná',en:'Self-checkout',de:'Selbstbedienung'},p:20000},
 ];
 
-// ═══════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════
-let step = 0;
-const STEPS = 7;
-let cfg = {
-  color: COLORS[0], mat: MATS[0],
-  acceptors: new Set(['coin','card']),
-  currencies: new Set(['CZK']),
-  primaryLang: 'cs', displayLangs: new Set(['cs','en']),
-  machine: 'cash',
-  sticker: STICKER_LAYOUTS[0],
-  stickerColor1: '#e8c87a', stickerColor2: '#ffffff',
-  stickerFont: 'sans-serif',
-  meshVis: {},
+// ═══════════════ STATE ═══════════════
+let step=0;
+const BASE=45000;
+let cfg={
+  color:COLORS[0],mat:MATS[0],
+  acceptors:new Set(['coin','card']),
+  currencies:new Set(['CZK']),
+  primaryLang:'cs',displayLangs:new Set(['cs','en']),
+  machine:'laundry',
+  // Sticker options
+  stkLayout:'logo_top',
+  stkAccent:'#3ab5c8',   // barva akcentů
+  stkBody:'#d8d8d8',     // barva těla
+  stkText:'PRÁDLOMAT',   // vlastní text
+  stkFont:'Arial,sans-serif',
+  stkShowBubbles:true,
+  stkShowArrows:true,
+  stkShowPrice:true,
+  meshVis:{},
 };
-const BASE = 45000;
-
-function calcPrice(){
-  let p = BASE;
-  p += cfg.color.price;
-  p += cfg.mat.price;
-  cfg.acceptors.forEach(id=>{ const a=ACCEPTORS.find(x=>x.id===id); if(a) p+=a.price; });
-  cfg.currencies.forEach(c=>{ const x=CURRENCIES.find(y=>y.code===c); if(x) p+=x.price; });
-  p += MACHINES.find(m=>m.id===cfg.machine)?.price||0;
-  p += cfg.sticker.price;
+const price=()=>{
+  let p=BASE+cfg.color.p+cfg.mat.p;
+  cfg.acceptors.forEach(id=>{const a=ACCEPTORS.find(x=>x.id===id);if(a)p+=a.p});
+  cfg.currencies.forEach(c=>{const x=CURRENCIES.find(y=>y.c===c);if(x)p+=x.p});
+  p+=MACHINES.find(m=>m.id===cfg.machine)?.p||0;
   return p;
-}
+};
 
-// ═══════════════════════════════════════════════
-// THREE.JS
-// ═══════════════════════════════════════════════
-const canvas = document.getElementById('canvas');
-const renderer = new THREE.WebGLRenderer({canvas,antialias:true});
+// ═══════════════ THREE.JS ═══════════════
+const canvas=document.getElementById('canvas');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
 renderer.setPixelRatio(devicePixelRatio);
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
-renderer.shadowMap.enabled = true;
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0d0d14);
-const camera = new THREE.PerspectiveCamera(45,1,0.01,1000);
-
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.2;
+renderer.shadowMap.enabled=true;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x0d0d14);
+const camera=new THREE.PerspectiveCamera(45,1,0.01,1000);
 scene.add(new THREE.AmbientLight(0xffffff,0.6));
-const dl=new THREE.DirectionalLight(0xffffff,1.2); dl.position.set(5,10,5); dl.castShadow=true; scene.add(dl);
-const fl=new THREE.DirectionalLight(0x8ab4f8,0.4); fl.position.set(-5,0,-5); scene.add(fl);
-const rl=new THREE.DirectionalLight(0xe8c87a,0.3); rl.position.set(0,-3,5); scene.add(rl);
-const grid=new THREE.GridHelper(10,20,0x222233,0x111122); scene.add(grid);
-
+const dl=new THREE.DirectionalLight(0xffffff,1.2);dl.position.set(5,10,5);dl.castShadow=true;scene.add(dl);
+scene.add(Object.assign(new THREE.DirectionalLight(0x8ab4f8,0.4),{position:{set:()=>{}}}) );
+const fl=new THREE.DirectionalLight(0x8ab4f8,.4);fl.position.set(-5,0,-5);scene.add(fl);
+const rl=new THREE.DirectionalLight(0xe8c87a,.3);rl.position.set(0,-3,5);scene.add(rl);
+const grid=new THREE.GridHelper(10,20,0x222233,0x111122);scene.add(grid);
 let sph={theta:Math.PI/4,phi:Math.PI/3,radius:5};
-let camTarget=new THREE.Vector3();
-let drag=false, pm={x:0,y:0};
+let ct=new THREE.Vector3(),drag=false,pm={x:0,y:0};
 canvas.addEventListener('mousedown',e=>{drag=true;pm={x:e.clientX,y:e.clientY}});
 canvas.addEventListener('mouseup',()=>drag=false);
-canvas.addEventListener('mousemove',e=>{if(!drag)return;sph.theta-=(e.clientX-pm.x)*0.005;sph.phi=Math.max(0.1,Math.min(Math.PI-0.1,sph.phi+(e.clientY-pm.y)*0.005));pm={x:e.clientX,y:e.clientY};updateCam()});
-canvas.addEventListener('wheel',e=>{sph.radius=Math.max(0.5,Math.min(20,sph.radius+e.deltaY*0.01));updateCam()});
-let lt2=null;
-canvas.addEventListener('touchstart',e=>{lt2=e.touches[0]});
-canvas.addEventListener('touchmove',e=>{if(!lt2)return;const t=e.touches[0];sph.theta-=(t.clientX-lt2.clientX)*0.005;sph.phi=Math.max(0.1,Math.min(Math.PI-0.1,sph.phi+(t.clientY-lt2.clientY)*0.005));lt2=t;updateCam();e.preventDefault()},{passive:false});
-
-function updateCam(){
-  camera.position.set(camTarget.x+sph.radius*Math.sin(sph.phi)*Math.sin(sph.theta),camTarget.y+sph.radius*Math.cos(sph.phi),camTarget.z+sph.radius*Math.sin(sph.phi)*Math.cos(sph.theta));
-  camera.lookAt(camTarget);
-}
-updateCam();
-
-function resize(){const vp=canvas.parentElement,w=vp.clientWidth,h=vp.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}
-window.addEventListener('resize',resize);resize();
-
-let meshes=[],mats=[];
+canvas.addEventListener('mousemove',e=>{if(!drag)return;sph.theta-=(e.clientX-pm.x)*.005;sph.phi=Math.max(.1,Math.min(Math.PI-.1,sph.phi+(e.clientY-pm.y)*.005));pm={x:e.clientX,y:e.clientY};ucam()});
+canvas.addEventListener('wheel',e=>{sph.radius=Math.max(.5,Math.min(20,sph.radius+e.deltaY*.01));ucam()});
+let lt=null;
+canvas.addEventListener('touchstart',e=>{lt=e.touches[0]});
+canvas.addEventListener('touchmove',e=>{if(!lt)return;const t=e.touches[0];sph.theta-=(t.clientX-lt.clientX)*.005;sph.phi=Math.max(.1,Math.min(Math.PI-.1,sph.phi+(t.clientY-lt.clientY)*.005));lt=t;ucam();e.preventDefault()},{passive:false});
+function ucam(){camera.position.set(ct.x+sph.radius*Math.sin(sph.phi)*Math.sin(sph.theta),ct.y+sph.radius*Math.cos(sph.phi),ct.z+sph.radius*Math.sin(sph.phi)*Math.cos(sph.theta));camera.lookAt(ct)}
+ucam();
+function rsz(){const v=canvas.parentElement,w=v.clientWidth,h=v.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}
+window.addEventListener('resize',()=>{rsz();draw2D()});rsz();
+let meshes=[],mats3d=[];
 async function loadGLB(){
-  try{
-    const r=await fetch('BS-S-0204.glb');
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const buf=await r.arrayBuffer();
-    document.getElementById('loading-text').textContent='Parsuju model...';
-    parseGLB(buf);
-  }catch(e){document.getElementById('loading').innerHTML=`<div style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);border-radius:8px;padding:20px;text-align:center;max-width:320px"><p style="color:#ff6b6b;margin-bottom:8px">⚠️ Chyba načítání</p><p style="font-size:12px;color:rgba(255,255,255,0.5)">${e.message}</p></div>`}
+  try{const r=await fetch('BS-S-0204.glb');if(!r.ok)throw new Error('HTTP '+r.status);const buf=await r.arrayBuffer();document.getElementById('ltxt').textContent='Parsuju...';parseGLB(buf)}
+  catch(e){document.getElementById('loading').innerHTML=`<div style="background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.3);border-radius:8px;padding:20px;text-align:center"><p style="color:#ff6b6b">⚠️ ${e.message}</p></div>`}
 }
 function parseGLB(buf){
   const dv=new DataView(buf);
   if(dv.getUint32(0,true)!==0x46546C67){throw new Error('Neplatný GLB')}
   const jl=dv.getUint32(12,true);
   const gltf=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,20,jl)));
-  const bin=buf.slice(20+jl+8);
-  buildScene(gltf,bin);
+  buildScene(gltf,buf.slice(20+jl+8));
 }
-function getAcc(gltf,bin,i){
-  const a=gltf.accessors[i],bv=gltf.bufferViews[a.bufferView];
-  const off=(bv.byteOffset||0)+(a.byteOffset||0);
-  const n={SCALAR:1,VEC2:2,VEC3:3,VEC4:4}[a.type]||1;
-  const T2={5121:Uint8Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[a.componentType];
-  return new T2(bin,off,a.count*n);
-}
+function getA(gltf,bin,i){const a=gltf.accessors[i],bv=gltf.bufferViews[a.bufferView];const off=(bv.byteOffset||0)+(a.byteOffset||0);const n={SCALAR:1,VEC2:2,VEC3:3,VEC4:4}[a.type]||1;const T2={5121:Uint8Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[a.componentType];return new T2(bin,off,a.count*n)}
 function buildScene(gltf,bin){
   if(!gltf.meshes?.length)return;
-  const grp=new THREE.Group();
-  meshes=[];mats=[];
+  const grp=new THREE.Group();meshes=[];mats3d=[];
   gltf.meshes.forEach((mesh,mi)=>{
     const obj=new THREE.Group();obj.name=mesh.name||`Část ${mi+1}`;
     mesh.primitives.forEach(p=>{
       try{
         const geo=new THREE.BufferGeometry();
-        if(p.attributes.POSITION!=null)geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(getAcc(gltf,bin,p.attributes.POSITION)),3));
-        if(p.attributes.NORMAL!=null)geo.setAttribute('normal',new THREE.BufferAttribute(new Float32Array(getAcc(gltf,bin,p.attributes.NORMAL)),3));
-        if(p.indices!=null)geo.setIndex(new THREE.BufferAttribute(new Uint32Array(getAcc(gltf,bin,p.indices)),1));
+        if(p.attributes.POSITION!=null)geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(getA(gltf,bin,p.attributes.POSITION)),3));
+        if(p.attributes.NORMAL!=null)geo.setAttribute('normal',new THREE.BufferAttribute(new Float32Array(getA(gltf,bin,p.attributes.NORMAL)),3));
+        if(p.indices!=null)geo.setIndex(new THREE.BufferAttribute(new Uint32Array(getA(gltf,bin,p.indices)),1));
         if(!geo.attributes.normal)geo.computeVertexNormals();
-        const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(cfg.color.hex),roughness:cfg.mat.price===0?0.7:cfg.mat.price===5000?0.9:cfg.mat.price===8000?0.1:0.3,metalness:cfg.mat.price===12000?0.9:0.1});
-        mats.push(mat);
-        const m=new THREE.Mesh(geo,mat);m.castShadow=true;m.receiveShadow=true;obj.add(m);
+        const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(cfg.color.h),roughness:.7,metalness:.1});
+        mats3d.push(mat);obj.add(new THREE.Mesh(geo,mat));
       }catch(e){}
     });
     grp.add(obj);meshes.push(obj);cfg.meshVis[mi]=true;
   });
   const box=new THREE.Box3().setFromObject(grp);
-  const ctr=box.getCenter(new THREE.Vector3());
-  const sz=box.getSize(new THREE.Vector3());
+  const ctr=box.getCenter(new THREE.Vector3()),sz=box.getSize(new THREE.Vector3());
   const sc=2.5/Math.max(sz.x,sz.y,sz.z);
   grp.scale.setScalar(sc);grp.position.sub(ctr.multiplyScalar(sc));
   const nb=new THREE.Box3().setFromObject(grp);
-  grid.position.y=nb.min.y;camTarget.set(0,(nb.min.y+nb.max.y)/2,0);
-  sph.radius=Math.max(sz.x,sz.y,sz.z)*sc*2.5;updateCam();
+  grid.position.y=nb.min.y;ct.set(0,(nb.min.y+nb.max.y)/2,0);
+  sph.radius=Math.max(sz.x,sz.y,sz.z)*sc*2.5;ucam();
   scene.add(grp);
   document.getElementById('loading').style.display='none';
   document.getElementById('hdr-info').textContent=`${meshes.length} součástí`;
-  renderStep();renderSummary();
+  renderStep();renderSum();
 }
 function applyMat(){
-  mats.forEach(m=>{
-    m.color.set(cfg.color.hex);
-    const mp=cfg.mat.price;
-    m.roughness=mp===0?0.7:mp===5000?0.9:mp===8000?0.1:0.3;
-    m.metalness=mp===12000?0.9:0.1;
-    m.needsUpdate=true;
+  mats3d.forEach(m=>{
+    m.color.set(cfg.color.h);
+    const mp=cfg.mat.p;
+    m.roughness=mp===0?.7:mp===5000?.9:mp===8000?.05:.3;
+    m.metalness=mp===12000?.9:.1;m.needsUpdate=true;
   });
 }
-
 (function loop(){requestAnimationFrame(loop);renderer.render(scene,camera)})();
 loadGLB();
 
-// ═══════════════════════════════════════════════
-// STEP RENDERING
-// ═══════════════════════════════════════════════
-function renderSteps(){
-  const c=document.getElementById('steps');
-  c.innerHTML=T[uiLang].steps.map((s,i)=>`
-    <button class="step-tab ${i===step?'active':i<step?'done':''}" onclick="goStep(${i})">
-      <span class="step-num">${i<step?'✓':i+1}</span>${s}
-    </button>`).join('');
+// ═══════════════ 2D CANVAS ═══════════════
+const c2=document.getElementById('canvas2d');
+const ctx2=c2.getContext('2d');
+
+function draw2D(){
+  const W=700,H=480;
+  c2.width=W;c2.height=H;
+  const ac=cfg.stkAccent;
+  const bc=cfg.stkBody;
+  const txt=cfg.stkText||'PRÁDLOMAT';
+  const fnt=cfg.stkFont;
+
+  // Pozadí
+  ctx2.fillStyle='#111118';
+  ctx2.fillRect(0,0,W,H);
+
+  // Nožičky
+  ctx2.fillStyle='#888';
+  [[80,430,18,40],[200,430,18,40],[480,430,18,40],[600,430,18,40]].forEach(([x,y,w,h])=>{
+    roundRect(ctx2,x,y,w,h,3,true,false);
+  });
+
+  // TĚLO kiosku
+  const bodyGrad=ctx2.createLinearGradient(50,0,650,0);
+  bodyGrad.addColorStop(0,'#b8b8b8');
+  bodyGrad.addColorStop(.3,bc);
+  bodyGrad.addColorStop(.7,bc);
+  bodyGrad.addColorStop(1,'#a0a0a0');
+  ctx2.fillStyle=bodyGrad;
+  roundRect(ctx2,50,90,600,340,6,true,false);
+  ctx2.strokeStyle='#888';ctx2.lineWidth=1;
+  roundRect(ctx2,50,90,600,340,6,false,true);
+
+  // TOP PANEL - barva akcentu
+  const topGrad=ctx2.createLinearGradient(0,60,0,110);
+  topGrad.addColorStop(0,ac);
+  topGrad.addColorStop(1,darken(ac,.8));
+  ctx2.fillStyle=topGrad;
+  roundRect(ctx2,50,60,600,50,4,true,false);
+
+  // Logo kruh vlevo v top panelu
+  ctx2.strokeStyle='white';ctx2.lineWidth=2;
+  ctx2.beginPath();ctx2.arc(90,85,14,0,Math.PI*2);ctx2.stroke();
+  ctx2.beginPath();ctx2.arc(90,85,8,0,Math.PI*2);ctx2.stroke();
+
+  // PRÁDLOMAT text
+  ctx2.fillStyle='white';ctx2.font=`bold 18px ${fnt}`;ctx2.letterSpacing='1px';
+  ctx2.fillText(txt,112,92);
+
+  // Šipky v top panelu
+  ctx2.fillStyle='rgba(255,255,255,0.7)';ctx2.font='bold 20px Arial';
+  ctx2.fillText('›',310,92);ctx2.fillText('›',332,92);
+
+  // 24/7
+  ctx2.fillStyle='rgba(255,255,255,0.85)';ctx2.font='bold 13px Arial';
+  ctx2.fillText('24/7',440,80);
+
+  // Logo vpravo
+  ctx2.fillStyle=darken(ac,.7);
+  roundRect(ctx2,490,67,155,38,3,true,false);
+  ctx2.fillStyle='white';ctx2.font='11px Arial';
+  ctx2.fillText('◀ '+txt+' ●',500,91);
+
+  // LEVÝ PANEL - ovládací
+  ctx2.fillStyle='#c0c0c0';
+  roundRect(ctx2,58,98,105,334,3,true,false);
+
+  // Display na panelu
+  ctx2.fillStyle='#0a2030';
+  roundRect(ctx2,66,110,88,125,3,true,false);
+  ctx2.fillStyle='#0a3040';
+  roundRect(ctx2,69,113,82,85,2,true,false);
+  // Display text
+  ctx2.fillStyle=ac;ctx2.font='bold 9px Arial';ctx2.textAlign='center';
+  ctx2.fillText('VÍTEJTE',110,140);
+  ctx2.fillStyle='#88ccdd';ctx2.font='8px Arial';
+  ctx2.fillText('Vložte mince',110,155);
+  ctx2.fillText('nebo kartu',110,167);
+  ctx2.textAlign='left';
+
+  // Card slot
+  ctx2.fillStyle='#888';roundRect(ctx2,72,243,74,10,2,true,false);
+  ctx2.fillStyle='#666';ctx2.font='7px Arial';ctx2.textAlign='center';ctx2.fillText('KARTA',109,251);ctx2.textAlign='left';
+
+  // Mincovník slot
+  ctx2.fillStyle='#777';roundRect(ctx2,72,258,74,7,1,true,false);
+
+  // Tlačítka
+  ctx2.fillStyle=ac;
+  roundRect(ctx2,72,272,32,16,2,true,false);
+  roundRect(ctx2,110,272,32,16,2,true,false);
+  ctx2.fillStyle='#555';
+  roundRect(ctx2,72,294,32,16,2,true,false);
+  roundRect(ctx2,110,294,32,16,2,true,false);
+
+  // Logo kruh dole na panelu
+  ctx2.strokeStyle=ac;ctx2.lineWidth=2;
+  ctx2.beginPath();ctx2.arc(110,395,18,0,Math.PI*2);ctx2.stroke();
+  ctx2.beginPath();ctx2.arc(110,395,10,0,Math.PI*2);ctx2.stroke();
+
+  // Dělící linie
+  ctx2.strokeStyle='#aaa';ctx2.lineWidth=1;
+  ctx2.beginPath();ctx2.moveTo(330,100);ctx2.lineTo(330,428);ctx2.stroke();
+  ctx2.beginPath();ctx2.moveTo(500,100);ctx2.lineTo(500,428);ctx2.stroke();
+  ctx2.beginPath();ctx2.moveTo(163,100);ctx2.lineTo(163,428);ctx2.stroke();
+
+  // STROJ 1 - PRAČKA 8kg
+  drawMachine(ctx2,163,98,167,334,'PRAČKA','8 kg',cfg.stkShowPrice?'150 Kč':'',ac,bc,fnt,cfg.stkShowArrows,cfg.stkShowBubbles,false);
+  // STROJ 2 - PRAČKA 18kg
+  drawMachine(ctx2,330,98,170,334,'PRAČKA','18 kg',cfg.stkShowPrice?'200 Kč':'',ac,bc,fnt,cfg.stkShowArrows,cfg.stkShowBubbles,false);
+  // STROJ 3 - SUŠIČKA
+  drawMachine(ctx2,500,98,148,334,'SUŠIČKA','18 kg',cfg.stkShowPrice?'50 Kč':'',ac,bc,fnt,cfg.stkShowArrows,cfg.stkShowBubbles,true);
 }
 
+function drawMachine(ctx,x,y,w,h,label,kg,price,ac,bc,fnt,showArrows,showBubbles,isDryer){
+  const cx=x+w/2,cy=y+h*.55;
+  const r=Math.min(w*.42,80);
+
+  // Panel pozadí
+  ctx.fillStyle=bc==='#d8d8d8'?'#d4d4d4':lighten(bc,.9);
+  roundRect(ctx,x,y,w,h,3,true,false);
+
+  // Název
+  ctx.fillStyle='#333';ctx.font=`bold 13px ${fnt}`;ctx.textAlign='center';
+  ctx.fillText(label,cx,y+30);
+
+  // Cena
+  if(price){ctx.fillStyle=ac;ctx.font=`bold 12px ${fnt}`;ctx.fillText(price,cx,y+47);}
+
+  // Šipky
+  if(showArrows){
+    ctx.fillStyle=ac;ctx.font='bold 16px Arial';
+    ctx.fillText('∨',cx-20,y+63);ctx.fillText('∨',cx,y+63);ctx.fillText('∨',cx+18,y+63);
+  }
+
+  // Průzor - vnější kruh
+  ctx.fillStyle='#888';ctx.strokeStyle='#666';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(cx,cy,r+7,0,Math.PI*2);ctx.fill();ctx.stroke();
+  // Střední kruh
+  ctx.fillStyle='#444';ctx.beginPath();ctx.arc(cx,cy,r+1,0,Math.PI*2);ctx.fill();
+  // Sklo
+  const glassGrad=ctx.createRadialGradient(cx-r*.25,cy-r*.25,0,cx,cy,r);
+  glassGrad.addColorStop(0,isDryer?'rgba(180,100,50,.7)':'rgba(180,220,240,.7)');
+  glassGrad.addColorStop(1,isDryer?'rgba(60,30,10,.6)':'rgba(40,100,140,.6)');
+  ctx.fillStyle=glassGrad;
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+  // Vnitřek
+  ctx.fillStyle=isDryer?'#2a1a0a':'#1a3a4a';
+  ctx.beginPath();ctx.arc(cx,cy,r*.86,0,Math.PI*2);ctx.fill();
+  // Obsah
+  if(isDryer){
+    ctx.fillStyle='rgba(255,120,50,.25)';
+    ctx.beginPath();ctx.ellipse(cx,cy-r*.2,r*.4,r*.2,0,0,Math.PI*2);ctx.fill();
+  } else {
+    ctx.fillStyle=`${ac}44`;
+    ctx.beginPath();ctx.ellipse(cx,cy+r*.35,r*.5,r*.18,0,0,Math.PI*2);ctx.fill();
+  }
+
+  // Kg text
+  ctx.fillStyle='#444';ctx.font=`bold 12px ${fnt}`;ctx.textAlign='center';
+  ctx.fillText(kg,cx,y+h-55);
+
+  // Bublinky
+  if(showBubbles&&!isDryer){
+    const by=y+h-35;
+    [[cx-40,8,ac],[cx-22,5,'white'],[cx,10,ac],[cx+20,6,'white'],[cx+40,8,ac]].forEach(([bx,br,col])=>{
+      ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.globalAlpha=.65;
+      ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.stroke();
+      ctx.globalAlpha=1;
+    });
+  }
+
+  // 18KG velký text pro sušičku
+  if(isDryer&&w<180){
+    ctx.fillStyle='rgba(80,80,80,.35)';ctx.font=`bold 38px ${fnt}`;
+    ctx.fillText('18',x+w+20,cy+10);
+    ctx.font=`bold 18px ${fnt}`;ctx.fillText('KG',x+w+18,cy+30);
+  }
+
+  ctx.textAlign='left';
+}
+
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+  if(fill)ctx.fill();if(stroke)ctx.stroke();
+}
+function darken(hex,f){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgb(${Math.round(r*f)},${Math.round(g*f)},${Math.round(b*f)})`}
+function lighten(hex,f){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgb(${Math.min(255,Math.round(r+(255-r)*f))},${Math.min(255,Math.round(g+(255-g)*f))},${Math.min(255,Math.round(b+(255-b)*f))})`}
+
+// ═══════════════ VIEW TOGGLE ═══════════════
+function switchView(v){
+  const is3d=v==='3d';
+  document.getElementById('view3d').style.display=is3d?'block':'none';
+  document.getElementById('view2d').classList.toggle('visible',!is3d);
+  document.getElementById('btn3d').classList.toggle('active',is3d);
+  document.getElementById('btn2d').classList.toggle('active',!is3d);
+  if(!is3d){draw2D();rsz2d();}
+}
+function rsz2d(){
+  const v2=document.getElementById('view2d');
+  c2.style.width=Math.min(v2.clientWidth,700)+'px';
+}
+
+// ═══════════════ STEP RENDERING ═══════════════
+function renderSteps(){
+  document.getElementById('steps').innerHTML=t('steps').map((s,i)=>`<button class="step-tab ${i===step?'active':i<step?'done':''}" onclick="goStep(${i})"><span class="step-num">${i<step?'✓':i+1}</span>${s}</button>`).join('');
+}
 function renderStep(){
   renderSteps();
-  const p=document.getElementById('panel-content');
-  const steps=[renderColor,renderAcceptors,renderCurrency,renderLangs,renderMachine,renderSticker,renderSummaryStep];
-  p.innerHTML=steps[step]?steps[step]():'';
-  bindStepEvents();
+  const renders=[rColor,rAcceptors,rCurrency,rLangs,rMachine,rSticker,rSummaryStep];
+  document.getElementById('panel-content').innerHTML=renders[step]?renders[step]():'';
+  bindEvents();
 }
 
-function renderColor(){
-  const matKeys=MATS.map(m=>({key:m.key,label:t('mat_'+m.key),price:m.price}));
-  return `
-  <div class="section-title">${t('color_surface')}</div>
-  <div class="color-grid">${COLORS.map((c,i)=>`<div class="swatch ${cfg.color===c?'active':''}" style="background:${c.hex}" title="${c.name[uiLang]||c.name.cs}" data-ci="${i}"></div>`).join('')}</div>
-  <div class="sel-label" id="clabel">${cfg.color.name[uiLang]||cfg.color.name.cs}${cfg.color.price>0?' (+'+cfg.color.price.toLocaleString()+' Kč)':''}</div>
-  <div class="section-title" style="margin-top:16px">${t('material_type')}</div>
-  <div class="mat-tabs">${MATS.map((m,i)=>`<button class="mat-tab ${cfg.mat===m?'active':''}" data-mi="${i}">${t('mat_'+m.key)}${m.price>0?' +'+m.price.toLocaleString()+' Kč':''}</button>`).join('')}</div>
-  <div class="section-title">${t('components')}</div>
-  <div>${meshes.map((m,i)=>`<div class="mesh-item"><span class="mesh-name">${m.name}</span><button class="toggle ${cfg.meshVis[i]?'on':''}" data-mesh="${i}"></button></div>`).join('')}</div>`;
+function rColor(){
+  return`<div class="sec">Barva povrchu</div>
+  <div class="color-grid">${COLORS.map((c,i)=>`<div class="swatch ${cfg.color===c?'active':''}" style="background:${c.h}" title="${c.n[uiLang]||c.n.cs}" data-ci="${i}"></div>`).join('')}</div>
+  <div class="sel-label" id="clbl">${cfg.color.n[uiLang]||cfg.color.n.cs}${cfg.color.p>0?' (+'+cfg.color.p.toLocaleString()+' Kč)':''}</div>
+  <div class="sec">Typ materiálu</div>
+  <div class="mat-tabs">${MATS.map((m,i)=>`<button class="mat-tab ${cfg.mat===m?'active':''}" data-mi="${i}">${t('mat_'+m.k)}${m.p>0?' +'+m.p.toLocaleString()+' Kč':''}</button>`).join('')}</div>
+  <div class="sec">Komponenty</div>
+  <div>${meshes.map((m,i)=>`<div class="mesh-item"><span class="mesh-name">${m.name}</span><button class="toggle ${cfg.meshVis[i]?'on':''}" data-mesh="${i}"></button></div>`).join('')||'<div style="font-size:11px;color:rgba(255,255,255,0.3)">Načítám součásti...</div>'}</div>`;
 }
 
-function renderAcceptors(){
-  return `<div class="section-title">${t('acceptors')}</div>
-  <div class="opt-grid">${ACCEPTORS.map(a=>`
-    <div class="opt-card ${cfg.acceptors.has(a.id)?'active':''}" data-acc="${a.id}">
-      <div class="icon">${a.icon}</div>
-      <div class="name">${a.name[uiLang]||a.name.cs}</div>
-      <div class="desc">${a.desc[uiLang]||a.desc.cs}</div>
-      <div class="price">+${a.price.toLocaleString()} Kč</div>
-    </div>`).join('')}</div>`;
+function rAcceptors(){
+  return`<div class="sec">Akceptory platby</div>
+  <div class="opt-grid">${ACCEPTORS.map(a=>`<div class="opt-card ${cfg.acceptors.has(a.id)?'active':''}" data-acc="${a.id}"><div class="icon">${a.ic}</div><div class="name">${a.n[uiLang]||a.n.cs}</div><div class="desc">${a.d[uiLang]||a.d.cs}</div><div class="price">+${a.p.toLocaleString()} Kč</div></div>`).join('')}</div>`;
+}
+function rCurrency(){
+  return`<div class="sec">Akceptovaná měna</div>
+  <div class="cur-grid">${CURRENCIES.map(c=>`<div class="cur-item ${cfg.currencies.has(c.c)?'active':''}" data-cur="${c.c}">${c.f} <span style="flex:1">${c.n}</span><span style="color:#888;font-size:10px">${c.s}</span>${c.p>0?`<span style="color:#e8c87a;font-size:9px">+${c.p}</span>`:''}</div>`).join('')}</div>`;
+}
+function rLangs(){
+  return`<div class="sec">Jazyky displeje</div>
+  <div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:8px">Max 6 jazyků · dvojklik = hlavní jazyk</div>
+  <div class="lang-grid">${DLANGS.map(l=>{const ip=cfg.primaryLang===l.c,is2=cfg.displayLangs.has(l.c);return`<div class="lang-card ${ip?'primary':is2?'active':''}" data-lang="${l.c}">${l.f} <span style="font-size:11px;flex:1">${l.n}</span>${ip?`<span class="lang-badge badge-p">Hlavní</span>`:is2?`<span class="lang-badge badge-s">✓</span>`:''}</div>`}).join('')}</div>`;
+}
+function rMachine(){
+  return`<div class="sec">Typ stroje / vybavení</div>
+  <div class="mach-list">${MACHINES.map(m=>`<div class="mach-item ${cfg.machine===m.id?'active':''}" data-mach="${m.id}"><span class="mi">${m.ic}</span><div><div class="mn">${m.n[uiLang]||m.n.cs}</div><div class="md">${m.d[uiLang]||m.d.cs}</div></div><span class="mp">${m.p>0?'+'+m.p.toLocaleString()+' Kč':'Zahrnuto'}</span></div>`).join('')}</div>`;
 }
 
-function renderCurrency(){
-  return `<div class="section-title">${t('currency')}</div>
-  <div class="currency-grid">${CURRENCIES.map(c=>`
-    <div class="currency-item ${cfg.currencies.has(c.code)?'active':''}" data-cur="${c.code}">
-      <span class="flag">${c.flag}</span>
-      <span class="cname">${c.name}</span>
-      <span class="csym">${c.sym}</span>
-      ${c.price>0?`<span style="font-size:9px;color:#e8c87a;margin-left:auto">+${c.price.toLocaleString()}</span>`:''}
-    </div>`).join('')}</div>`;
-}
+function rSticker(){
+  // Na step polepů automaticky přepni na 2D
+  setTimeout(()=>switchView('2d'),50);
+  return`
+  <div class="sec">Barva akcentů (top panel, šipky)</div>
+  <div class="stk-row"><label>Barva akcentu</label><input type="color" class="color-inp" id="s-accent" value="${cfg.stkAccent}"><span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:6px">${cfg.stkAccent}</span></div>
 
-function renderLangs(){
-  return `<div class="section-title">${t('lang_display')}</div>
-  <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:10px">${t('lang_hint')}</div>
-  <div class="lang-grid">${DISPLAY_LANGS.map(l=>{
-    const isPrimary=cfg.primaryLang===l.code;
-    const isSelected=cfg.displayLangs.has(l.code);
-    return `<div class="lang-card ${isPrimary?'primary-lang':isSelected?'active':''}" data-lang="${l.code}">
-      <span class="lang-flag">${l.flag}</span>
-      <span class="lang-name">${l.name}</span>
-      ${isPrimary?`<span class="lang-badge badge-primary">${t('primary')}</span>`:isSelected?`<span class="lang-badge badge-selected">${t('selected')}</span>`:''}
-    </div>`;
-  }).join('')}</div>`;
-}
+  <div class="sec">Barva těla kiosku</div>
+  <div class="stk-row"><label>Barva těla</label><input type="color" class="color-inp" id="s-body" value="${cfg.stkBody}"><span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:6px">${cfg.stkBody}</span></div>
 
-function renderMachine(){
-  return `<div class="section-title">${t('machine_type')}</div>
-  <div class="machine-list">${MACHINES.map(m=>`
-    <div class="machine-item ${cfg.machine===m.id?'active':''}" data-mach="${m.id}">
-      <span class="micon">${m.icon}</span>
-      <div class="minfo">
-        <div class="mname">${m.name[uiLang]||m.name.cs}</div>
-        <div class="mdesc">${m.desc[uiLang]||m.desc.cs}</div>
-      </div>
-      <span class="mprice">${m.price>0?'+'+m.price.toLocaleString()+' Kč':'Included'}</span>
-    </div>`).join('')}</div>`;
-}
+  <div class="sec">Text loga</div>
+  <div class="stk-row"><label>Název</label><input type="text" class="stk-text-inp" id="s-text" value="${cfg.stkText}" placeholder="PRÁDLOMAT" maxlength="20"></div>
 
-function renderSticker(){
-  return `<div class="section-title">${t('sticker')}</div>
-  <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:10px">${t('sticker_hint')}</div>
-  <div class="opt-grid" style="grid-template-columns:1fr">${STICKER_LAYOUTS.map(s=>`
-    <div class="opt-card ${cfg.sticker===s?'active':''}" style="text-align:left;display:flex;align-items:center;gap:10px" data-stk="${s.id}">
-      <div style="flex:1"><div class="name">${s.name[uiLang]||s.name.cs}</div></div>
-      <div class="price">${s.price>0?'+'+s.price.toLocaleString()+' Kč':'Zdarma'}</div>
-    </div>`).join('')}</div>
-  ${cfg.sticker.id!=='blank'?`
-  <div class="section-title" style="margin-top:16px">Nastavení polepů</div>
-  <div class="sticker-opts">
-    <div class="sticker-row">
-      <label>Hlavní barva</label>
-      <input type="color" class="color-input" id="sc1" value="${cfg.stickerColor1}">
-      <span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:6px">${cfg.stickerColor1}</span>
-    </div>
-    <div class="sticker-row">
-      <label>Vedlejší barva</label>
-      <input type="color" class="color-input" id="sc2" value="${cfg.stickerColor2}">
-      <span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:6px">${cfg.stickerColor2}</span>
-    </div>
-    <div class="sticker-row">
-      <label>Písmo</label>
-      <select class="sticker-select" id="sfont">
-        <option value="sans-serif" ${cfg.stickerFont==='sans-serif'?'selected':''}>Sans-serif (moderní)</option>
-        <option value="serif" ${cfg.stickerFont==='serif'?'selected':''}>Serif (klasický)</option>
-        <option value="monospace" ${cfg.stickerFont==='monospace'?'selected':''}>Monospace (technický)</option>
-      </select>
-    </div>
+  <div class="sec">Písmo</div>
+  <div class="stk-row"><label>Font</label>
+  <select class="stk-select" id="s-font">
+    <option value="Arial,sans-serif" ${cfg.stkFont==='Arial,sans-serif'?'selected':''}>Arial (moderní)</option>
+    <option value="Georgia,serif" ${cfg.stkFont==='Georgia,serif'?'selected':''}>Georgia (klasický)</option>
+    <option value="'Courier New',monospace" ${cfg.stkFont==="'Courier New',monospace"?'selected':''}>Courier (technický)</option>
+    <option value="Impact,sans-serif" ${cfg.stkFont==='Impact,sans-serif'?'selected':''}>Impact (výrazný)</option>
+  </select></div>
+
+  <div class="sec">Prvky polepů</div>
+  <div class="stk-row"><label>Bublinky</label>
+    <button class="toggle ${cfg.stkShowBubbles?'on':''}" id="s-bubbles"></button>
   </div>
-  <div style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.03);border-radius:6px;border:1px solid rgba(255,255,255,0.08)">
-    <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:8px;letter-spacing:1px">NÁHLED</div>
-    <div id="sticker-preview-box" style="height:60px;border-radius:4px;background:linear-gradient(135deg,${cfg.stickerColor1},${cfg.stickerColor2});display:flex;align-items:center;justify-content:center;font-family:${cfg.stickerFont};font-size:18px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.5)">BS KIOSEK</div>
-  </div>`:``}`;
-}
+  <div class="stk-row"><label>Šipky</label>
+    <button class="toggle ${cfg.stkShowArrows?'on':''}" id="s-arrows"></button>
+  </div>
+  <div class="stk-row"><label>Ceny na stroji</label>
+    <button class="toggle ${cfg.stkShowPrice?'on':''}" id="s-price"></button>
+  </div>
 
-function renderSummaryStep(){
-  const price=calcPrice();
-  const accList=[...cfg.acceptors].map(id=>ACCEPTORS.find(a=>a.id===id)?.name[uiLang]||id).join(', ');
-  const curList=[...cfg.currencies].join(', ');
-  const langList=[...cfg.displayLangs].map(c=>DISPLAY_LANGS.find(l=>l.code===c)?.name||c).join(', ');
-  const mach=MACHINES.find(m=>m.id===cfg.machine);
-  return `
-  <div class="section-title">${t('summary')}</div>
-  <table style="width:100%;font-size:11px;border-collapse:collapse">
-    ${row('Barva',cfg.color.name[uiLang]||cfg.color.name.cs)}
-    ${row('Materiál',t('mat_'+cfg.mat.key))}
-    ${row('Akceptory',accList||'—')}
-    ${row('Měna',curList||'—')}
-    ${row('Jazyky',langList||'—')}
-    ${row('Stroj',mach?.name[uiLang]||mach?.name.cs||'—')}
-    ${row('Polep',cfg.sticker.name[uiLang]||cfg.sticker.name.cs)}
-  </table>
-  <div style="margin-top:16px;padding:12px;background:rgba(232,200,122,0.08);border:1px solid rgba(232,200,122,0.2);border-radius:6px;text-align:center">
-    <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px">Celková cena</div>
-    <div style="font-size:24px;font-weight:700;color:#e8c87a">${price.toLocaleString()} Kč</div>
+  <div style="margin-top:12px;padding:10px;background:rgba(232,200,122,.06);border:1px solid rgba(232,200,122,.2);border-radius:6px;font-size:11px;color:rgba(255,255,255,.5)">
+    ← Přepni na <strong style="color:#e8c87a">2D náhled polepů</strong> nahoře pro živý náhled
   </div>`;
 }
-function row(k,v){return `<tr><td style="padding:5px 0;color:rgba(255,255,255,0.4);width:90px">${k}</td><td style="color:#fff">${v}</td></tr>`;}
 
-function bindStepEvents(){
-  // Color swatches
-  document.querySelectorAll('[data-ci]').forEach(el=>el.addEventListener('click',()=>{
-    cfg.color=COLORS[+el.dataset.ci];applyMat();renderStep();renderSummary();
-  }));
-  // Mat tabs
-  document.querySelectorAll('[data-mi]').forEach(el=>el.addEventListener('click',()=>{
-    cfg.mat=MATS[+el.dataset.mi];applyMat();renderStep();renderSummary();
-  }));
-  // Mesh toggles
-  document.querySelectorAll('[data-mesh]').forEach(el=>el.addEventListener('click',()=>{
-    const i=+el.dataset.mesh;cfg.meshVis[i]=!cfg.meshVis[i];meshes[i].visible=cfg.meshVis[i];el.classList.toggle('on',cfg.meshVis[i]);
-  }));
-  // Acceptors
-  document.querySelectorAll('[data-acc]').forEach(el=>el.addEventListener('click',()=>{
-    const id=el.dataset.acc;cfg.acceptors.has(id)?cfg.acceptors.delete(id):cfg.acceptors.add(id);renderStep();renderSummary();
-  }));
-  // Currency
-  document.querySelectorAll('[data-cur]').forEach(el=>el.addEventListener('click',()=>{
-    const c=el.dataset.cur;cfg.currencies.has(c)?cfg.currencies.delete(c):cfg.currencies.add(c);renderStep();renderSummary();
-  }));
-  // Display langs
-  document.querySelectorAll('[data-lang]').forEach(el=>el.addEventListener('click',()=>{
-    const c=el.dataset.lang;
-    if(cfg.primaryLang===c)return; // can't deselect primary
-    if(cfg.displayLangs.has(c)){
-      if(cfg.displayLangs.size>1)cfg.displayLangs.delete(c);
-    } else {
-      if(cfg.displayLangs.size>=6){alert('Maximálně 6 jazyků!');return;}
-      cfg.displayLangs.add(c);
-    }
-    // double click = set primary
-    el.addEventListener('dblclick',()=>{cfg.primaryLang=c;cfg.displayLangs.add(c);renderStep();},{once:true});
-    renderStep();renderSummary();
-  }));
-  // Machine
-  document.querySelectorAll('[data-mach]').forEach(el=>el.addEventListener('click',()=>{cfg.machine=el.dataset.mach;renderStep();renderSummary()}));
-  // Stickers
-  document.querySelectorAll('[data-stk]').forEach(el=>el.addEventListener('click',()=>{cfg.sticker=STICKER_LAYOUTS.find(s=>s.id===el.dataset.stk);renderStep();renderSummary()}));
-  // Sticker colors
-  const sc1=document.getElementById('sc1');
-  if(sc1)sc1.addEventListener('input',e=>{cfg.stickerColor1=e.target.value;const box=document.getElementById('sticker-preview-box');if(box)box.style.background=`linear-gradient(135deg,${cfg.stickerColor1},${cfg.stickerColor2})`;});
-  const sc2=document.getElementById('sc2');
-  if(sc2)sc2.addEventListener('input',e=>{cfg.stickerColor2=e.target.value;const box=document.getElementById('sticker-preview-box');if(box)box.style.background=`linear-gradient(135deg,${cfg.stickerColor1},${cfg.stickerColor2})`;});
-  const sf=document.getElementById('sfont');
-  if(sf)sf.addEventListener('change',e=>{cfg.stickerFont=e.target.value;const box=document.getElementById('sticker-preview-box');if(box)box.style.fontFamily=cfg.stickerFont;});
+function rSummaryStep(){
+  const p=price();
+  const row=(k,v)=>`<tr><td style="padding:5px 0;color:rgba(255,255,255,.4);width:90px;font-size:11px">${k}</td><td style="font-size:11px;color:#fff">${v}</td></tr>`;
+  return`<div class="sec">Souhrn</div>
+  <table style="width:100%;border-collapse:collapse">
+    ${row('Barva',cfg.color.n[uiLang]||cfg.color.n.cs)}
+    ${row('Materiál',t('mat_'+cfg.mat.k))}
+    ${row('Akceptory',[...cfg.acceptors].join(', ')||'—')}
+    ${row('Měna',[...cfg.currencies].join(', ')||'—')}
+    ${row('Jazyky',[...cfg.displayLangs].join(', ')||'—')}
+    ${row('Stroj',MACHINES.find(m=>m.id===cfg.machine)?.n[uiLang]||'—')}
+    ${row('Polep akcent',cfg.stkAccent)}
+    ${row('Logo',cfg.stkText)}
+  </table>
+  <div style="margin-top:14px;padding:12px;background:rgba(232,200,122,.08);border:1px solid rgba(232,200,122,.2);border-radius:6px;text-align:center">
+    <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:4px">Celková cena</div>
+    <div style="font-size:24px;font-weight:700;color:#e8c87a">${p.toLocaleString()} Kč</div>
+    <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:3px">bez DPH</div>
+  </div>`;
 }
 
-function renderSummary(){
-  const price=calcPrice();
-  document.getElementById('summary-panel').innerHTML=`
-    <div class="sum-row"><span>${t('base')}</span><span class="price-val">${BASE.toLocaleString()} Kč</span></div>
-    ${cfg.color.price>0?`<div class="sum-row"><span>${cfg.color.name[uiLang]||cfg.color.name.cs}</span><span class="price-val">+${cfg.color.price.toLocaleString()} Kč</span></div>`:''}
-    ${cfg.mat.price>0?`<div class="sum-row"><span>${t('mat_'+cfg.mat.key)}</span><span class="price-val">+${cfg.mat.price.toLocaleString()} Kč</span></div>`:''}
-    <div class="sum-row total"><span>${t('total')}</span><span class="price-val">${price.toLocaleString()} Kč</span></div>`;
+function bindEvents(){
+  document.querySelectorAll('[data-ci]').forEach(el=>el.addEventListener('click',()=>{cfg.color=COLORS[+el.dataset.ci];applyMat();renderStep();renderSum()}));
+  document.querySelectorAll('[data-mi]').forEach(el=>el.addEventListener('click',()=>{cfg.mat=MATS[+el.dataset.mi];applyMat();renderStep();renderSum()}));
+  document.querySelectorAll('[data-mesh]').forEach(el=>el.addEventListener('click',()=>{const i=+el.dataset.mesh;cfg.meshVis[i]=!cfg.meshVis[i];meshes[i].visible=cfg.meshVis[i];el.classList.toggle('on',cfg.meshVis[i])}));
+  document.querySelectorAll('[data-acc]').forEach(el=>el.addEventListener('click',()=>{const id=el.dataset.acc;cfg.acceptors.has(id)?cfg.acceptors.delete(id):cfg.acceptors.add(id);renderStep();renderSum()}));
+  document.querySelectorAll('[data-cur]').forEach(el=>el.addEventListener('click',()=>{const c=el.dataset.cur;cfg.currencies.has(c)?cfg.currencies.delete(c):cfg.currencies.add(c);renderStep();renderSum()}));
+  document.querySelectorAll('[data-lang]').forEach(el=>{
+    el.addEventListener('click',()=>{const c=el.dataset.lang;if(cfg.primaryLang===c)return;if(cfg.displayLangs.has(c)){if(cfg.displayLangs.size>1)cfg.displayLangs.delete(c);}else{if(cfg.displayLangs.size>=6){alert('Max 6!');return;}cfg.displayLangs.add(c);}renderStep();renderSum()});
+    el.addEventListener('dblclick',()=>{const c=el.dataset.lang;cfg.primaryLang=c;cfg.displayLangs.add(c);renderStep();renderSum()});
+  });
+  document.querySelectorAll('[data-mach]').forEach(el=>el.addEventListener('click',()=>{cfg.machine=el.dataset.mach;renderStep();renderSum()}));
+
+  // Sticker controls
+  const sa=document.getElementById('s-accent');
+  if(sa)sa.addEventListener('input',e=>{cfg.stkAccent=e.target.value;draw2D()});
+  const sb=document.getElementById('s-body');
+  if(sb)sb.addEventListener('input',e=>{cfg.stkBody=e.target.value;draw2D()});
+  const st=document.getElementById('s-text');
+  if(st)st.addEventListener('input',e=>{cfg.stkText=e.target.value;draw2D()});
+  const sf=document.getElementById('s-font');
+  if(sf)sf.addEventListener('change',e=>{cfg.stkFont=e.target.value;draw2D()});
+  const sbub=document.getElementById('s-bubbles');
+  if(sbub)sbub.addEventListener('click',()=>{cfg.stkShowBubbles=!cfg.stkShowBubbles;sbub.classList.toggle('on',cfg.stkShowBubbles);draw2D()});
+  const sarr=document.getElementById('s-arrows');
+  if(sarr)sarr.addEventListener('click',()=>{cfg.stkShowArrows=!cfg.stkShowArrows;sarr.classList.toggle('on',cfg.stkShowArrows);draw2D()});
+  const spr=document.getElementById('s-price');
+  if(spr)spr.addEventListener('click',()=>{cfg.stkShowPrice=!cfg.stkShowPrice;spr.classList.toggle('on',cfg.stkShowPrice);draw2D()});
 }
 
-// ═══════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════
-function goStep(s){step=s;renderStep();renderSummary();updateNavBtns()}
-function nextStep(){if(step<STEPS-1){step++;renderStep();renderSummary();updateNavBtns()}}
-function prevStep(){if(step>0){step--;renderStep();renderSummary();updateNavBtns()}}
-function updateNavBtns(){
+function renderSum(){
+  const p=price();
+  document.getElementById('sum-panel').innerHTML=`
+    <div class="sum-row"><span>Základní cena</span><span class="pv">${BASE.toLocaleString()} Kč</span></div>
+    ${cfg.color.p>0?`<div class="sum-row"><span>${cfg.color.n[uiLang]||cfg.color.n.cs}</span><span class="pv">+${cfg.color.p.toLocaleString()} Kč</span></div>`:''}
+    ${cfg.mat.p>0?`<div class="sum-row"><span>${t('mat_'+cfg.mat.k)}</span><span class="pv">+${cfg.mat.p.toLocaleString()} Kč</span></div>`:''}
+    <div class="sum-row total"><span>Celkem</span><span class="pv">${p.toLocaleString()} Kč</span></div>`;
+}
+
+function goStep(s){step=s;renderStep();renderSum();updNav();if(s!==5)switchView('3d')}
+function nextStep(){if(step<6){step++;renderStep();renderSum();updNav()}}
+function prevStep(){if(step>0){step--;renderStep();renderSum();updNav();if(step!==5)switchView('3d')}}
+function updNav(){
   document.getElementById('btn-prev').style.display=step===0?'none':'block';
-  document.getElementById('btn-next').textContent=step===STEPS-1?t('save'):t('next');
-  document.getElementById('btn-next').onclick=step===STEPS-1?showSummaryModal:nextStep;
+  const nb=document.getElementById('btn-next');
+  nb.textContent=step===6?'Uložit':'Další →';
+  nb.onclick=step===6?showModal:nextStep;
 }
 
-// ═══════════════════════════════════════════════
-// CAMERA
-// ═══════════════════════════════════════════════
 function setView(v){
-  const views={front:[Math.PI,Math.PI/2],side:[Math.PI/2,Math.PI/2],top:[Math.PI/4,0.15],iso:[Math.PI/4,Math.PI/3]};
-  [sph.theta,sph.phi]=views[v];updateCam();
+  const views={front:[Math.PI,Math.PI/2],side:[Math.PI/2,Math.PI/2],top:[Math.PI/4,.15],iso:[Math.PI/4,Math.PI/3]};
+  [sph.theta,sph.phi]=views[v];ucam();
 }
-function resetCamera(){sph.theta=Math.PI/4;sph.phi=Math.PI/3;updateCam()}
 
-// ═══════════════════════════════════════════════
-// SUMMARY MODAL
-// ═══════════════════════════════════════════════
-function showSummaryModal(){
-  const price=calcPrice();
-  const accList=[...cfg.acceptors].map(id=>ACCEPTORS.find(a=>a.id===id)).filter(Boolean);
-  const curList=[...cfg.currencies];
-  const langList=[...cfg.displayLangs].map(c=>DISPLAY_LANGS.find(l=>l.code===c)).filter(Boolean);
-  const mach=MACHINES.find(m=>m.id===cfg.machine);
+function showModal(){
+  const p=price();
+  const mrow=(k,v,pr)=>`<tr style="border-bottom:1px solid rgba(255,255,255,.05)"><td style="padding:7px 0;color:rgba(255,255,255,.4);width:100px;font-size:12px">${k}</td><td style="font-size:12px;color:#fff">${v||'—'}</td><td style="color:#e8c87a;text-align:right;font-size:11px">${pr>0?'+'+pr.toLocaleString()+' Kč':''}</td></tr>`;
   document.getElementById('modal-content').innerHTML=`
-    <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:16px">
-      ${mrow('Barva',cfg.color.name[uiLang]||cfg.color.name.cs,cfg.color.price)}
-      ${mrow('Materiál',t('mat_'+cfg.mat.key),cfg.mat.price)}
-      ${mrow('Akceptory',accList.map(a=>a.name[uiLang]||a.name.cs).join(', '),accList.reduce((s,a)=>s+a.price,0))}
-      ${mrow('Měna',curList.join(', '),0)}
-      ${mrow('Jazyky displeje',langList.map(l=>l.name).join(', '),0)}
-      ${mrow('Typ stroje',mach?.name[uiLang]||mach?.name.cs,mach?.price||0)}
-      ${mrow('Polep',cfg.sticker.name[uiLang]||cfg.sticker.name.cs,cfg.sticker.price)}
+    <table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+      ${mrow('Barva',cfg.color.n[uiLang]||cfg.color.n.cs,cfg.color.p)}
+      ${mrow('Materiál',t('mat_'+cfg.mat.k),cfg.mat.p)}
+      ${mrow('Akceptory',[...cfg.acceptors].join(', '),[...cfg.acceptors].reduce((s,id)=>{const a=ACCEPTORS.find(x=>x.id===id);return s+(a?.p||0)},0))}
+      ${mrow('Měna',[...cfg.currencies].join(', '),0)}
+      ${mrow('Jazyky',[...cfg.displayLangs].join(', '),0)}
+      ${mrow('Stroj',MACHINES.find(m=>m.id===cfg.machine)?.n[uiLang],MACHINES.find(m=>m.id===cfg.machine)?.p||0)}
+      ${mrow('Logo',cfg.stkText,0)}
+      ${mrow('Akcent',cfg.stkAccent,0)}
     </table>
-    <div style="background:rgba(232,200,122,0.1);border:1px solid rgba(232,200,122,0.3);border-radius:8px;padding:16px;text-align:center">
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px">CELKOVÁ CENA</div>
-      <div style="font-size:28px;font-weight:700;color:#e8c87a">${price.toLocaleString()} Kč</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px">bez DPH</div>
+    <div style="background:rgba(232,200,122,.1);border:1px solid rgba(232,200,122,.3);border-radius:8px;padding:14px;text-align:center">
+      <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:5px">CELKOVÁ CENA</div>
+      <div style="font-size:26px;font-weight:700;color:#e8c87a">${p.toLocaleString()} Kč</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:3px">bez DPH</div>
     </div>`;
   document.getElementById('modal').style.display='flex';
 }
-function mrow(k,v,p){return `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:8px 0;color:rgba(255,255,255,0.4);width:110px">${k}</td><td style="color:#fff">${v||'—'}</td><td style="color:#e8c87a;text-align:right">${p>0?'+'+p.toLocaleString()+' Kč':''}</td></tr>`}
 
-function downloadConfig(){
-  const price=calcPrice();
-  const txt=`BS KONFIGURÁTOR - SOUHRN\n${'='.repeat(40)}\nDatum: ${new Date().toLocaleDateString('cs-CZ')}\n\nBarva: ${cfg.color.name[uiLang]||cfg.color.name.cs}\nMateriál: ${t('mat_'+cfg.mat.key)}\nAkceptory: ${[...cfg.acceptors].join(', ')}\nMěna: ${[...cfg.currencies].join(', ')}\nJazyky: ${[...cfg.displayLangs].join(', ')}\nTyp stroje: ${cfg.machine}\nPolep: ${cfg.sticker.name[uiLang]||cfg.sticker.name.cs}\n\nCELKOVÁ CENA: ${price.toLocaleString()} Kč (bez DPH)`;
+function dlConfig(){
+  const p=price();
+  const txt=`BS KONFIGURÁTOR - SOUHRN\n${'='.repeat(40)}\nDatum: ${new Date().toLocaleDateString('cs-CZ')}\n\nBarva: ${cfg.color.n.cs}\nMateriál: ${t('mat_'+cfg.mat.k)}\nAkceptory: ${[...cfg.acceptors].join(', ')}\nMěna: ${[...cfg.currencies].join(', ')}\nJazyky: ${[...cfg.displayLangs].join(', ')}\nTyp stroje: ${cfg.machine}\nLogo text: ${cfg.stkText}\nBarva akcentu: ${cfg.stkAccent}\n\nCELKOVÁ CENA: ${p.toLocaleString()} Kč (bez DPH)`;
   const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(txt);a.download='konfigurace-BS.txt';a.click();
 }
 
-// Init
-renderStep();renderSummary();updateNavBtns();
+// INIT
+renderStep();renderSum();updNav();
 </script>
 </body>
 </html>
