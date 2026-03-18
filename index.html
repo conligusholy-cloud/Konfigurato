@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Konfigurátor BS-S-0204</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',sans-serif; background:#0a0a0f; color:#fff; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+
+  header { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); }
+  .logo { font-size:18px; font-weight:700; letter-spacing:2px; color:#e8c87a; }
+  .logo span { color:#fff; font-weight:300; }
+  .btn { padding:8px 18px; border-radius:4px; font-size:13px; cursor:pointer; border:none; font-weight:600; letter-spacing:1px; transition:all .2s; }
+  .btn-outline { background:transparent; border:1px solid rgba(255,255,255,0.3); color:#fff; }
+  .btn-outline:hover { border-color:#e8c87a; color:#e8c87a; }
+  .btn-primary { background:#e8c87a; color:#0a0a0f; }
+  .btn-primary:hover { background:#f0d68a; }
+
+  .main { display:flex; flex:1; overflow:hidden; }
+  .viewport { flex:1; position:relative; }
+  canvas { width:100%; height:100%; display:block; }
+
+  .loading-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#0a0a0f; gap:16px; }
+  .spinner { width:48px; height:48px; border:3px solid rgba(232,200,122,0.2); border-top-color:#e8c87a; border-radius:50%; animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { font-size:14px; color:rgba(255,255,255,0.5); letter-spacing:1px; }
+
+  .viewport-controls { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:8px; }
+  .ctrl-btn { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); color:#fff; padding:8px 14px; border-radius:4px; cursor:pointer; font-size:12px; backdrop-filter:blur(10px); transition:all .2s; }
+  .ctrl-btn:hover { background:rgba(232,200,122,0.15); border-color:#e8c87a; color:#e8c87a; }
+
+  .panel { width:300px; background:rgba(255,255,255,0.03); border-left:1px solid rgba(255,255,255,0.08); overflow-y:auto; }
+  .panel::-webkit-scrollbar { width:4px; }
+  .panel::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:2px; }
+
+  .section { border-bottom:1px solid rgba(255,255,255,0.06); padding:18px; }
+  .section-title { font-size:10px; letter-spacing:2px; color:rgba(255,255,255,0.4); text-transform:uppercase; margin-bottom:14px; }
+
+  .color-grid { display:flex; flex-wrap:wrap; gap:8px; }
+  .color-swatch { width:36px; height:36px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:all .2s; }
+  .color-swatch:hover { transform:scale(1.1); }
+  .color-swatch.active { border-color:#e8c87a; box-shadow:0 0 0 2px rgba(232,200,122,0.3); }
+  .color-label { font-size:11px; color:rgba(255,255,255,0.5); margin-top:8px; }
+
+  .mesh-item { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+  .mesh-name { font-size:12px; color:rgba(255,255,255,0.7); }
+  .toggle { width:36px; height:20px; background:rgba(255,255,255,0.1); border-radius:10px; cursor:pointer; position:relative; transition:background .2s; border:none; }
+  .toggle.on { background:#e8c87a; }
+  .toggle::after { content:''; position:absolute; width:14px; height:14px; background:#fff; border-radius:50%; top:3px; left:3px; transition:left .2s; }
+  .toggle.on::after { left:19px; }
+
+  .mat-tab { padding:6px 12px; border-radius:4px; font-size:11px; cursor:pointer; border:1px solid rgba(255,255,255,0.15); background:transparent; color:rgba(255,255,255,0.6); transition:all .2s; margin:0 4px 4px 0; }
+  .mat-tab.active { background:rgba(232,200,122,0.15); border-color:#e8c87a; color:#e8c87a; }
+
+  .summary-row { display:flex; justify-content:space-between; font-size:12px; padding:4px 0; color:rgba(255,255,255,0.6); }
+  .summary-row.total { color:#fff; font-weight:700; font-size:14px; border-top:1px solid rgba(255,255,255,0.1); margin-top:8px; padding-top:8px; }
+  .price-val { color:#e8c87a; }
+
+  .error-box { background:rgba(255,80,80,0.1); border:1px solid rgba(255,80,80,0.3); border-radius:8px; padding:20px; max-width:400px; text-align:center; }
+  .error-box h3 { color:#ff6b6b; margin-bottom:8px; }
+  .error-box p { font-size:13px; color:rgba(255,255,255,0.6); line-height:1.6; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">BS<span> konfigurátor</span></div>
+  <div style="font-size:12px;color:rgba(255,255,255,0.4)" id="model-info">Načítám model...</div>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn-outline" onclick="resetCamera()">Resetovat pohled</button>
+    <button class="btn btn-primary" onclick="saveConfig()">Uložit konfiguraci</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="viewport">
+    <canvas id="canvas"></canvas>
+    <div class="loading-overlay" id="loading">
+      <div class="spinner"></div>
+      <div class="loading-text" id="loading-text">Načítám 3D model...</div>
+    </div>
+    <div class="viewport-controls">
+      <button class="ctrl-btn" onclick="setView('front')">Přední</button>
+      <button class="ctrl-btn" onclick="setView('side')">Boční</button>
+      <button class="ctrl-btn" onclick="setView('top')">Shora</button>
+      <button class="ctrl-btn" onclick="setView('iso')">Izometrický</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section">
+      <div class="section-title">Barva povrchu</div>
+      <div class="color-grid" id="color-grid"></div>
+      <div class="color-label" id="color-label">Vyberte barvu</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Typ materiálu</div>
+      <div id="mat-tabs"></div>
+    </div>
+    <div class="section">
+      <div class="section-title">Komponenty</div>
+      <div id="mesh-list">Načítám součásti...</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Konfigurace & cena</div>
+      <div id="summary"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const MODEL_URL = 'BS-S-0204.glb'; // stejná složka jako index.html
+
+const COLORS = [
+  { name:'Bílá',        hex:'#f5f5f5', price:0 },
+  { name:'Světle šedá', hex:'#b0b8c1', price:0 },
+  { name:'Antracit',    hex:'#3a3d42', price:2000 },
+  { name:'Černá',       hex:'#1a1a1a', price:2000 },
+  { name:'Béžová',      hex:'#d4c5a9', price:0 },
+  { name:'Zelená',      hex:'#4a7c59', price:3000 },
+  { name:'Modrá',       hex:'#2c5f8a', price:3000 },
+  { name:'Červená',     hex:'#8a2c2c', price:3000 },
+];
+
+const MATERIALS = [
+  { name:'Standardní', roughness:0.7, metalness:0.1, price:0 },
+  { name:'Matný lak',  roughness:0.9, metalness:0.0, price:5000 },
+  { name:'Lesk',       roughness:0.1, metalness:0.2, price:8000 },
+  { name:'Kov',        roughness:0.3, metalness:0.9, price:12000 },
+];
+
+const BASE_PRICE = 45000;
+let state = { color:COLORS[0], material:MATERIALS[0], meshVisibility:{}, price:BASE_PRICE };
+let loadedMeshes = [], configMaterials = [];
+
+// Three.js setup
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0d0d14);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1000);
+const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambient);
+const dir = new THREE.DirectionalLight(0xffffff, 1.2);
+dir.position.set(5,10,5); dir.castShadow = true; scene.add(dir);
+const fill = new THREE.DirectionalLight(0x8ab4f8, 0.4);
+fill.position.set(-5,0,-5); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xe8c87a, 0.3);
+rim.position.set(0,-3,5); scene.add(rim);
+const grid = new THREE.GridHelper(10, 20, 0x222233, 0x111122);
+scene.add(grid);
+
+// Orbit
+let isDragging = false, prevMouse = {x:0,y:0};
+let sph = { theta:Math.PI/4, phi:Math.PI/3, radius:5 };
+let target = new THREE.Vector3();
+
+canvas.addEventListener('mousedown', e => { isDragging=true; prevMouse={x:e.clientX,y:e.clientY}; });
+canvas.addEventListener('mouseup', () => isDragging=false);
+canvas.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  sph.theta -= (e.clientX-prevMouse.x)*0.005;
+  sph.phi = Math.max(0.1, Math.min(Math.PI-0.1, sph.phi+(e.clientY-prevMouse.y)*0.005));
+  prevMouse={x:e.clientX,y:e.clientY}; updateCam();
+});
+canvas.addEventListener('wheel', e => { sph.radius=Math.max(0.5,Math.min(20,sph.radius+e.deltaY*0.01)); updateCam(); });
+
+let lt=null;
+canvas.addEventListener('touchstart', e=>{ lt=e.touches[0]; });
+canvas.addEventListener('touchmove', e=>{
+  if(!lt) return;
+  const t=e.touches[0];
+  sph.theta-=(t.clientX-lt.clientX)*0.005;
+  sph.phi=Math.max(0.1,Math.min(Math.PI-0.1,sph.phi+(t.clientY-lt.clientY)*0.005));
+  lt=t; updateCam(); e.preventDefault();
+},{passive:false});
+
+function updateCam() {
+  camera.position.set(
+    target.x+sph.radius*Math.sin(sph.phi)*Math.sin(sph.theta),
+    target.y+sph.radius*Math.cos(sph.phi),
+    target.z+sph.radius*Math.sin(sph.phi)*Math.cos(sph.theta)
+  );
+  camera.lookAt(target);
+}
+updateCam();
+
+function resize() {
+  const vp=canvas.parentElement, w=vp.clientWidth, h=vp.clientHeight;
+  renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize); resize();
+
+// GLB loader
+async function loadGLB(url) {
+  setLoading('Stahuji model...');
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const buf = await res.arrayBuffer();
+    setLoading('Parsuju geometrii...');
+    parseGLB(buf);
+  } catch(e) { showError(e.message); }
+}
+
+function parseGLB(buffer) {
+  const view = new DataView(buffer);
+  if (view.getUint32(0,true) !== 0x46546C67) { showError('Neplatný GLB soubor'); return; }
+  const jsonLen = view.getUint32(12,true);
+  const gltf = JSON.parse(new TextDecoder().decode(new Uint8Array(buffer,20,jsonLen)));
+  const binData = buffer.slice(20+jsonLen+8);
+  buildScene(gltf, binData);
+}
+
+function getAcc(gltf, bin, idx) {
+  const acc=gltf.accessors[idx], bv=gltf.bufferViews[acc.bufferView];
+  const off=(bv.byteOffset||0)+(acc.byteOffset||0);
+  const n={SCALAR:1,VEC2:2,VEC3:3,VEC4:4}[acc.type]||1;
+  const T={5121:Uint8Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[acc.componentType];
+  return new T(bin,off,acc.count*n);
+}
+
+function buildScene(gltf, bin) {
+  if (!gltf.meshes?.length) { showError('Model neobsahuje meshe'); return; }
+  const group = new THREE.Group();
+  loadedMeshes=[]; configMaterials=[];
+
+  gltf.meshes.forEach((mesh,mi) => {
+    const obj = new THREE.Group();
+    obj.name = mesh.name || `Část ${mi+1}`;
+    mesh.primitives.forEach(p => {
+      try {
+        const geo = new THREE.BufferGeometry();
+        if (p.attributes.POSITION!=null) geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(getAcc(gltf,bin,p.attributes.POSITION)),3));
+        if (p.attributes.NORMAL!=null)   geo.setAttribute('normal',   new THREE.BufferAttribute(new Float32Array(getAcc(gltf,bin,p.attributes.NORMAL)),3));
+        if (p.attributes.TEXCOORD_0!=null) geo.setAttribute('uv',     new THREE.BufferAttribute(new Float32Array(getAcc(gltf,bin,p.attributes.TEXCOORD_0)),2));
+        if (p.indices!=null) geo.setIndex(new THREE.BufferAttribute(new Uint32Array(getAcc(gltf,bin,p.indices)),1));
+        if (!geo.attributes.normal) geo.computeVertexNormals();
+        const mat = new THREE.MeshStandardMaterial({ color:new THREE.Color(state.color.hex), roughness:state.material.roughness, metalness:state.material.metalness });
+        configMaterials.push(mat);
+        const m = new THREE.Mesh(geo,mat); m.castShadow=true; m.receiveShadow=true;
+        obj.add(m);
+      } catch(e) { console.warn(e); }
+    });
+    group.add(obj); loadedMeshes.push(obj); state.meshVisibility[mi]=true;
+  });
+
+  const box=new THREE.Box3().setFromObject(group);
+  const center=box.getCenter(new THREE.Vector3());
+  const size=box.getSize(new THREE.Vector3());
+  const scale=2.5/Math.max(size.x,size.y,size.z);
+  group.scale.setScalar(scale);
+  group.position.sub(center.multiplyScalar(scale));
+  const nb=new THREE.Box3().setFromObject(group);
+  grid.position.y=nb.min.y;
+  target.set(0,(nb.min.y+nb.max.y)/2,0);
+  sph.radius=Math.max(size.x,size.y,size.z)*scale*2.5;
+  updateCam();
+  scene.add(group);
+  document.getElementById('loading').style.display='none';
+  document.getElementById('model-info').textContent=`${loadedMeshes.length} součástí`;
+  buildUI();
+}
+
+function setLoading(t) { document.getElementById('loading').style.display='flex'; document.getElementById('loading-text').textContent=t; }
+function showError(msg) {
+  document.getElementById('loading').innerHTML=`<div class="error-box"><h3>⚠️ Chyba načítání</h3><p>${msg}</p></div>`;
+}
+
+function buildUI() {
+  // Colors
+  const cg=document.getElementById('color-grid'); cg.innerHTML='';
+  COLORS.forEach((c,i)=>{
+    const sw=document.createElement('div');
+    sw.className='color-swatch'+(i===0?' active':'');
+    sw.style.background=c.hex; sw.title=c.name;
+    sw.onclick=()=>{ document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active')); sw.classList.add('active'); state.color=c; document.getElementById('color-label').textContent=c.name+(c.price>0?` (+${c.price.toLocaleString()} Kč)`:''); applyMat(); updateSummary(); };
+    cg.appendChild(sw);
+  });
+
+  // Materials
+  const mt=document.getElementById('mat-tabs'); mt.innerHTML='';
+  MATERIALS.forEach((m,i)=>{
+    const btn=document.createElement('button');
+    btn.className='mat-tab'+(i===0?' active':''); btn.textContent=m.name;
+    btn.onclick=()=>{ document.querySelectorAll('.mat-tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); state.material=m; applyMat(); updateSummary(); };
+    mt.appendChild(btn);
+  });
+
+  // Meshes
+  const ml=document.getElementById('mesh-list'); ml.innerHTML='';
+  loadedMeshes.forEach((mesh,i)=>{
+    const row=document.createElement('div'); row.className='mesh-item';
+    row.innerHTML=`<span class="mesh-name">${mesh.name}</span><button class="toggle on" id="tog-${i}"></button>`;
+    row.querySelector('button').onclick=function(){ this.classList.toggle('on'); mesh.visible=this.classList.contains('on'); };
+    ml.appendChild(row);
+  });
+
+  updateSummary();
+}
+
+function applyMat() {
+  configMaterials.forEach(m=>{ m.color.set(state.color.hex); m.roughness=state.material.roughness; m.metalness=state.material.metalness; m.needsUpdate=true; });
+}
+
+function updateSummary() {
+  const total=BASE_PRICE+state.color.price+state.material.price; state.price=total;
+  document.getElementById('summary').innerHTML=`
+    <div class="summary-row"><span>Základní cena</span><span class="price-val">${BASE_PRICE.toLocaleString()} Kč</span></div>
+    ${state.color.price>0?`<div class="summary-row"><span>Barva: ${state.color.name}</span><span class="price-val">+${state.color.price.toLocaleString()} Kč</span></div>`:''}
+    ${state.material.price>0?`<div class="summary-row"><span>Materiál: ${state.material.name}</span><span class="price-val">+${state.material.price.toLocaleString()} Kč</span></div>`:''}
+    <div class="summary-row total"><span>Celkem</span><span class="price-val">${total.toLocaleString()} Kč</span></div>`;
+}
+
+function setView(v) {
+  const r=sph.radius, views={front:[Math.PI,Math.PI/2],side:[Math.PI/2,Math.PI/2],top:[Math.PI/4,0.15],iso:[Math.PI/4,Math.PI/3]};
+  [sph.theta,sph.phi]=views[v]; updateCam();
+}
+function resetCamera() { sph.theta=Math.PI/4; sph.phi=Math.PI/3; updateCam(); }
+function saveConfig() {
+  alert(`✅ Konfigurace uložena!\n\nBarva: ${state.color.name}\nMaterial: ${state.material.name}\nCena: ${state.price.toLocaleString()} Kč`);
+}
+
+(function animate(){ requestAnimationFrame(animate); renderer.render(scene,camera); })();
+loadGLB(MODEL_URL);
+</script>
+</body>
+</html>
