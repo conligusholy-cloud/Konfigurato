@@ -3,142 +3,352 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D Konfigurátor BS-S-0204</title>
+<title>BS Konfigurátor</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Segoe UI',sans-serif; background:#0a0a0f; color:#fff; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#0a0a0f;color:#fff;display:flex;flex-direction:column;height:100vh;overflow:hidden}
 
-  header { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); }
-  .logo { font-size:18px; font-weight:700; letter-spacing:2px; color:#e8c87a; }
-  .logo span { color:#fff; font-weight:300; }
-  .btn { padding:8px 18px; border-radius:4px; font-size:13px; cursor:pointer; border:none; font-weight:600; letter-spacing:1px; transition:all .2s; }
-  .btn-outline { background:transparent; border:1px solid rgba(255,255,255,0.3); color:#fff; }
-  .btn-outline:hover { border-color:#e8c87a; color:#e8c87a; }
-  .btn-primary { background:#e8c87a; color:#0a0a0f; }
-  .btn-primary:hover { background:#f0d68a; }
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.08);z-index:100;flex-shrink:0}
+.logo{font-size:16px;font-weight:700;letter-spacing:2px;color:#e8c87a}
+.logo span{color:#fff;font-weight:300}
+.lang-switcher{display:flex;gap:4px}
+.lang-btn{padding:4px 10px;border-radius:3px;font-size:11px;cursor:pointer;border:1px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);transition:all .2s}
+.lang-btn.active{background:#e8c87a;color:#000;border-color:#e8c87a;font-weight:700}
+.btn{padding:7px 16px;border-radius:4px;font-size:12px;cursor:pointer;border:none;font-weight:600;letter-spacing:.5px;transition:all .2s}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.3);color:#fff}
+.btn-outline:hover{border-color:#e8c87a;color:#e8c87a}
+.btn-primary{background:#e8c87a;color:#0a0a0f}
+.btn-primary:hover{background:#f0d68a}
 
-  .main { display:flex; flex:1; overflow:hidden; }
-  .viewport { flex:1; position:relative; }
-  canvas { width:100%; height:100%; display:block; }
+/* STEP TABS */
+.steps{display:flex;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;overflow-x:auto}
+.step-tab{padding:10px 18px;font-size:11px;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);letter-spacing:.5px;text-transform:uppercase;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.step-tab.active{color:#e8c87a;border-bottom-color:#e8c87a}
+.step-tab.done{color:rgba(255,255,255,0.6)}
+.step-num{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.1);font-size:10px;display:flex;align-items:center;justify-content:center}
+.step-tab.active .step-num{background:#e8c87a;color:#000}
+.step-tab.done .step-num{background:#4caf50;color:#fff}
 
-  .loading-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#0a0a0f; gap:16px; }
-  .spinner { width:48px; height:48px; border:3px solid rgba(232,200,122,0.2); border-top-color:#e8c87a; border-radius:50%; animation:spin .8s linear infinite; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  .loading-text { font-size:14px; color:rgba(255,255,255,0.5); letter-spacing:1px; }
+/* MAIN */
+.main{display:flex;flex:1;overflow:hidden}
+.viewport{flex:1;position:relative}
+canvas{width:100%;height:100%;display:block}
 
-  .viewport-controls { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:8px; }
-  .ctrl-btn { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); color:#fff; padding:8px 14px; border-radius:4px; cursor:pointer; font-size:12px; backdrop-filter:blur(10px); transition:all .2s; }
-  .ctrl-btn:hover { background:rgba(232,200,122,0.15); border-color:#e8c87a; color:#e8c87a; }
+.loading-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0f;gap:12px;z-index:10}
+.spinner{width:40px;height:40px;border:3px solid rgba(232,200,122,0.2);border-top-color:#e8c87a;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  .panel { width:300px; background:rgba(255,255,255,0.03); border-left:1px solid rgba(255,255,255,0.08); overflow-y:auto; }
-  .panel::-webkit-scrollbar { width:4px; }
-  .panel::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:2px; }
+.view-btns{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+.vbtn{background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:6px 12px;border-radius:3px;cursor:pointer;font-size:11px;backdrop-filter:blur(10px);transition:all .2s}
+.vbtn:hover{border-color:#e8c87a;color:#e8c87a}
 
-  .section { border-bottom:1px solid rgba(255,255,255,0.06); padding:18px; }
-  .section-title { font-size:10px; letter-spacing:2px; color:rgba(255,255,255,0.4); text-transform:uppercase; margin-bottom:14px; }
+/* PANEL */
+.panel{width:320px;background:rgba(255,255,255,0.03);border-left:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;overflow:hidden}
+.panel-content{flex:1;overflow-y:auto;padding:16px}
+.panel-content::-webkit-scrollbar{width:3px}
+.panel-content::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
 
-  .color-grid { display:flex; flex-wrap:wrap; gap:8px; }
-  .color-swatch { width:36px; height:36px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:all .2s; }
-  .color-swatch:hover { transform:scale(1.1); }
-  .color-swatch.active { border-color:#e8c87a; box-shadow:0 0 0 2px rgba(232,200,122,0.3); }
-  .color-label { font-size:11px; color:rgba(255,255,255,0.5); margin-top:8px; }
+.section-title{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.35);text-transform:uppercase;margin-bottom:12px;margin-top:16px}
+.section-title:first-child{margin-top:0}
 
-  .mesh-item { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
-  .mesh-name { font-size:12px; color:rgba(255,255,255,0.7); }
-  .toggle { width:36px; height:20px; background:rgba(255,255,255,0.1); border-radius:10px; cursor:pointer; position:relative; transition:background .2s; border:none; }
-  .toggle.on { background:#e8c87a; }
-  .toggle::after { content:''; position:absolute; width:14px; height:14px; background:#fff; border-radius:50%; top:3px; left:3px; transition:left .2s; }
-  .toggle.on::after { left:19px; }
+/* COLOR */
+.color-grid{display:flex;flex-wrap:wrap;gap:6px}
+.swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.swatch:hover{transform:scale(1.1)}
+.swatch.active{border-color:#e8c87a;box-shadow:0 0 0 2px rgba(232,200,122,0.3)}
+.sel-label{font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px}
 
-  .mat-tab { padding:6px 12px; border-radius:4px; font-size:11px; cursor:pointer; border:1px solid rgba(255,255,255,0.15); background:transparent; color:rgba(255,255,255,0.6); transition:all .2s; margin:0 4px 4px 0; }
-  .mat-tab.active { background:rgba(232,200,122,0.15); border-color:#e8c87a; color:#e8c87a; }
+/* OPTION CARDS */
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:10px;cursor:pointer;transition:all .2s;text-align:center}
+.opt-card:hover{border-color:rgba(232,200,122,0.4)}
+.opt-card.active{border-color:#e8c87a;background:rgba(232,200,122,0.08)}
+.opt-card .icon{font-size:22px;margin-bottom:4px}
+.opt-card .name{font-size:11px;color:rgba(255,255,255,0.8);font-weight:600}
+.opt-card .desc{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;line-height:1.3}
+.opt-card .price{font-size:10px;color:#e8c87a;margin-top:4px}
 
-  .summary-row { display:flex; justify-content:space-between; font-size:12px; padding:4px 0; color:rgba(255,255,255,0.6); }
-  .summary-row.total { color:#fff; font-weight:700; font-size:14px; border-top:1px solid rgba(255,255,255,0.1); margin-top:8px; padding-top:8px; }
-  .price-val { color:#e8c87a; }
+/* CURRENCY CHECKBOXES */
+.currency-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.currency-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:5px;cursor:pointer;transition:all .2s}
+.currency-item.active{border-color:#e8c87a;background:rgba(232,200,122,0.06)}
+.currency-item .flag{font-size:16px}
+.currency-item .cname{font-size:11px;color:rgba(255,255,255,0.7)}
+.currency-item .csym{font-size:10px;color:rgba(255,255,255,0.4)}
 
-  .error-box { background:rgba(255,80,80,0.1); border:1px solid rgba(255,80,80,0.3); border-radius:8px; padding:20px; max-width:400px; text-align:center; }
-  .error-box h3 { color:#ff6b6b; margin-bottom:8px; }
-  .error-box p { font-size:13px; color:rgba(255,255,255,0.6); line-height:1.6; }
+/* MACHINE */
+.machine-list{display:flex;flex-direction:column;gap:6px}
+.machine-item{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;cursor:pointer;transition:all .2s}
+.machine-item:hover{border-color:rgba(232,200,122,0.3)}
+.machine-item.active{border-color:#e8c87a;background:rgba(232,200,122,0.06)}
+.machine-item .micon{font-size:20px;width:32px;text-align:center}
+.machine-item .minfo .mname{font-size:12px;font-weight:600}
+.machine-item .minfo .mdesc{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}
+.machine-item .mprice{margin-left:auto;font-size:11px;color:#e8c87a;font-weight:600}
+
+/* STICKER */
+.sticker-zone{background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.15);border-radius:8px;padding:16px;text-align:center;min-height:120px;position:relative;overflow:hidden}
+.sticker-preview{width:100%;height:80px;border-radius:4px;object-fit:cover;margin-bottom:8px}
+.sticker-opts{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.sticker-row{display:flex;gap:6px;align-items:center}
+.sticker-row label{font-size:10px;color:rgba(255,255,255,0.4);width:70px;flex-shrink:0}
+.sticker-select{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer}
+.sticker-select option{background:#1a1a2e}
+.color-input{width:32px;height:24px;border:none;border-radius:3px;cursor:pointer;padding:0}
+
+/* SUMMARY */
+.summary-panel{background:rgba(255,255,255,0.03);border-top:1px solid rgba(255,255,255,0.08);padding:12px 16px;flex-shrink:0}
+.sum-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:rgba(255,255,255,0.5)}
+.sum-row.total{color:#fff;font-weight:700;font-size:13px;border-top:1px solid rgba(255,255,255,0.1);margin-top:6px;padding-top:6px}
+.price-val{color:#e8c87a}
+
+/* MESH TOGGLES */
+.mesh-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.mesh-name{font-size:11px;color:rgba(255,255,255,0.6)}
+.toggle{width:32px;height:18px;background:rgba(255,255,255,0.1);border-radius:9px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:#e8c87a}
+.toggle::after{content:'';position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s}
+.toggle.on::after{left:17px}
+
+/* LANG STEP */
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.lang-card{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:5px;cursor:pointer;transition:all .2s}
+.lang-card.active{border-color:#e8c87a;background:rgba(232,200,122,0.06)}
+.lang-card.primary-lang{border-color:#4caf50;background:rgba(76,175,80,0.08)}
+.lang-flag{font-size:18px}
+.lang-name{font-size:11px;color:rgba(255,255,255,0.7)}
+.lang-badge{font-size:9px;padding:1px 5px;border-radius:3px;margin-left:auto}
+.badge-primary{background:#4caf50;color:#fff}
+.badge-selected{background:#e8c87a;color:#000}
+
+.mat-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.mat-tab{padding:5px 10px;border-radius:3px;font-size:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.5);transition:all .2s}
+.mat-tab.active{background:rgba(232,200,122,0.12);border-color:#e8c87a;color:#e8c87a}
+
+.nav-btns{display:flex;gap:8px;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0}
+.nav-btns .btn{flex:1;text-align:center}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">BS<span> konfigurátor</span></div>
-  <div style="font-size:12px;color:rgba(255,255,255,0.4)" id="model-info">Načítám model...</div>
-  <div style="display:flex;gap:10px">
-    <button class="btn btn-outline" onclick="resetCamera()">Resetovat pohled</button>
-    <button class="btn btn-primary" onclick="saveConfig()">Uložit konfiguraci</button>
+  <div class="lang-switcher" id="ui-lang-switcher">
+    <button class="lang-btn active" onclick="setUILang('cs')">CS</button>
+    <button class="lang-btn" onclick="setUILang('en')">EN</button>
+    <button class="lang-btn" onclick="setUILang('de')">DE</button>
+  </div>
+  <div style="display:flex;gap:8px">
+    <span id="hdr-info" style="font-size:11px;color:rgba(255,255,255,0.35);line-height:2"></span>
+    <button class="btn btn-primary" onclick="showSummaryModal()" data-t="save">Uložit konfiguraci</button>
   </div>
 </header>
+
+<div class="steps" id="steps"></div>
 
 <div class="main">
   <div class="viewport">
     <canvas id="canvas"></canvas>
     <div class="loading-overlay" id="loading">
       <div class="spinner"></div>
-      <div class="loading-text" id="loading-text">Načítám 3D model...</div>
+      <div id="loading-text" style="font-size:13px;color:rgba(255,255,255,0.4)">Načítám model...</div>
     </div>
-    <div class="viewport-controls">
-      <button class="ctrl-btn" onclick="setView('front')">Přední</button>
-      <button class="ctrl-btn" onclick="setView('side')">Boční</button>
-      <button class="ctrl-btn" onclick="setView('top')">Shora</button>
-      <button class="ctrl-btn" onclick="setView('iso')">Izometrický</button>
+    <div class="view-btns">
+      <button class="vbtn" onclick="setView('front')" data-t="front">Přední</button>
+      <button class="vbtn" onclick="setView('side')" data-t="side">Boční</button>
+      <button class="vbtn" onclick="setView('top')" data-t="top">Shora</button>
+      <button class="vbtn" onclick="setView('iso')" data-t="iso">Izometrický</button>
     </div>
   </div>
 
   <div class="panel">
-    <div class="section">
-      <div class="section-title">Barva povrchu</div>
-      <div class="color-grid" id="color-grid"></div>
-      <div class="color-label" id="color-label">Vyberte barvu</div>
+    <div class="panel-content" id="panel-content"></div>
+    <div class="summary-panel" id="summary-panel"></div>
+    <div class="nav-btns">
+      <button class="btn btn-outline" id="btn-prev" onclick="prevStep()" data-t="prev">← Zpět</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextStep()" data-t="next">Další →</button>
     </div>
-    <div class="section">
-      <div class="section-title">Typ materiálu</div>
-      <div id="mat-tabs"></div>
-    </div>
-    <div class="section">
-      <div class="section-title">Komponenty</div>
-      <div id="mesh-list">Načítám součásti...</div>
-    </div>
-    <div class="section">
-      <div class="section-title">Konfigurace & cena</div>
-      <div id="summary"></div>
+  </div>
+</div>
+
+<!-- SUMMARY MODAL -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:999;align-items:center;justify-content:center">
+  <div style="background:#12121e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:32px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto">
+    <h2 style="color:#e8c87a;margin-bottom:20px;font-size:18px" data-t="config_sum">Souhrn konfigurace</h2>
+    <div id="modal-content"></div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-outline" style="flex:1" onclick="document.getElementById('modal').style.display='none'" data-t="close">Zavřít</button>
+      <button class="btn btn-primary" style="flex:1" onclick="downloadConfig()" data-t="download">Stáhnout PDF</button>
     </div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-const MODEL_URL = 'BS-S-0204.glb'; // stejná složka jako index.html
+// ═══════════════════════════════════════════════
+// TRANSLATIONS
+// ═══════════════════════════════════════════════
+const T = {
+  cs:{
+    steps:['Barva & Materiál','Akceptory','Měna','Jazyk displeje','Typ stroje','Polepy','Souhrn'],
+    front:'Přední',side:'Boční',top:'Shora',iso:'Izometrický',
+    save:'Uložit konfiguraci',prev:'← Zpět',next:'Další →',
+    color_surface:'Barva povrchu',material_type:'Typ materiálu',components:'Komponenty',
+    acceptors:'Akceptory platby',currency:'Akceptovaná měna',
+    lang_display:'Jazyky na displeji',lang_hint:'Vyberte hlavní jazyk a až 5 dalších (celkem 6)',
+    machine_type:'Typ stroje / vybavení',
+    sticker:'Konfigurátor polepů',sticker_hint:'Navrhněte vlastní polepy kiosku',
+    summary:'Konfigurace & cena',base:'Základní cena',total:'Celkem',
+    config_sum:'Souhrn konfigurace',close:'Zavřít',download:'Stáhnout PDF',
+    primary:'Hlavní',selected:'Vybráno',
+    mat_std:'Standardní',mat_mat:'Matný lak',mat_gloss:'Lesk',mat_metal:'Kov',
+  },
+  en:{
+    steps:['Color & Material','Acceptors','Currency','Display Language','Machine Type','Stickers','Summary'],
+    front:'Front',side:'Side',top:'Top',iso:'Isometric',
+    save:'Save configuration',prev:'← Back',next:'Next →',
+    color_surface:'Surface color',material_type:'Material type',components:'Components',
+    acceptors:'Payment acceptors',currency:'Accepted currency',
+    lang_display:'Display languages',lang_hint:'Select primary language and up to 5 more (total 6)',
+    machine_type:'Machine type / equipment',
+    sticker:'Sticker configurator',sticker_hint:'Design your kiosk stickers',
+    summary:'Configuration & price',base:'Base price',total:'Total',
+    config_sum:'Configuration summary',close:'Close',download:'Download PDF',
+    primary:'Primary',selected:'Selected',
+    mat_std:'Standard',mat_mat:'Matte lacquer',mat_gloss:'Glossy',mat_metal:'Metal',
+  },
+  de:{
+    steps:['Farbe & Material','Akzeptoren','Währung','Display-Sprache','Maschinentyp','Aufkleber','Zusammenfassung'],
+    front:'Vorne',side:'Seite',top:'Oben',iso:'Isometrisch',
+    save:'Konfiguration speichern',prev:'← Zurück',next:'Weiter →',
+    color_surface:'Oberflächenfarbe',material_type:'Materialtyp',components:'Komponenten',
+    acceptors:'Zahlungsakzeptoren',currency:'Akzeptierte Währung',
+    lang_display:'Display-Sprachen',lang_hint:'Hauptsprache und bis zu 5 weitere wählen (gesamt 6)',
+    machine_type:'Maschinentyp / Ausstattung',
+    sticker:'Aufkleber-Konfigurator',sticker_hint:'Gestalten Sie Ihre Kiosk-Aufkleber',
+    summary:'Konfiguration & Preis',base:'Grundpreis',total:'Gesamt',
+    config_sum:'Konfigurationszusammenfassung',close:'Schließen',download:'PDF herunterladen',
+    primary:'Haupt',selected:'Ausgewählt',
+    mat_std:'Standard',mat_mat:'Mattlack',mat_gloss:'Hochglanz',mat_metal:'Metall',
+  }
+};
+let uiLang = 'cs';
+function t(k){ return (T[uiLang]||T.cs)[k] || k; }
+function setUILang(l){
+  uiLang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent===l.toUpperCase()));
+  renderStep();
+  renderSummary();
+  updateNavBtns();
+}
 
-const COLORS = [
-  { name:'Bílá',        hex:'#f5f5f5', price:0 },
-  { name:'Světle šedá', hex:'#b0b8c1', price:0 },
-  { name:'Antracit',    hex:'#3a3d42', price:2000 },
-  { name:'Černá',       hex:'#1a1a1a', price:2000 },
-  { name:'Béžová',      hex:'#d4c5a9', price:0 },
-  { name:'Zelená',      hex:'#4a7c59', price:3000 },
-  { name:'Modrá',       hex:'#2c5f8a', price:3000 },
-  { name:'Červená',     hex:'#8a2c2c', price:3000 },
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+const COLORS=[
+  {name:{cs:'Bílá',en:'White',de:'Weiß'},hex:'#f5f5f5',price:0},
+  {name:{cs:'Světle šedá',en:'Light grey',de:'Hellgrau'},hex:'#b0b8c1',price:0},
+  {name:{cs:'Antracit',en:'Anthracite',de:'Anthrazit'},hex:'#3a3d42',price:2000},
+  {name:{cs:'Černá',en:'Black',de:'Schwarz'},hex:'#1a1a1a',price:2000},
+  {name:{cs:'Béžová',en:'Beige',de:'Beige'},hex:'#d4c5a9',price:0},
+  {name:{cs:'Zelená',en:'Green',de:'Grün'},hex:'#4a7c59',price:3000},
+  {name:{cs:'Modrá',en:'Blue',de:'Blau'},hex:'#2c5f8a',price:3000},
+  {name:{cs:'Červená',en:'Red',de:'Rot'},hex:'#8a2c2c',price:3000},
+  {name:{cs:'Zlatá',en:'Gold',de:'Gold'},hex:'#c9a84c',price:5000},
+  {name:{cs:'Stříbrná',en:'Silver',de:'Silber'},hex:'#a8a8a8',price:3000},
+];
+const MATS=[
+  {key:'std',price:0},{key:'mat',price:5000},{key:'gloss',price:8000},{key:'metal',price:12000}
+];
+const ACCEPTORS=[
+  {id:'coin',icon:'🪙',name:{cs:'Mincovník',en:'Coin acceptor',de:'Münzakzeptor'},desc:{cs:'Přijímá mince',en:'Accepts coins',de:'Nimmt Münzen'},price:8000},
+  {id:'bill',icon:'💵',name:{cs:'Bankomatník',en:'Bill acceptor',de:'Banknotenakzeptor'},desc:{cs:'Přijímá bankovky',en:'Accepts banknotes',de:'Nimmt Banknoten'},price:15000},
+  {id:'card',icon:'💳',name:{cs:'Platební terminál',en:'Card terminal',de:'Kartenterminal'},desc:{cs:'Platební karty',en:'Payment cards',de:'Zahlungskarten'},price:12000},
+  {id:'nfc',icon:'📱',name:{cs:'NFC / Mobil',en:'NFC / Mobile',de:'NFC / Mobil'},desc:{cs:'Bezkontaktní',en:'Contactless',de:'Kontaktlos'},price:6000},
+  {id:'qr',icon:'📷',name:{cs:'QR platby',en:'QR payments',de:'QR-Zahlung'},desc:{cs:'QR kód',en:'QR code',de:'QR-Code'},price:4000},
+  {id:'crypto',icon:'₿',name:{cs:'Krypto',en:'Crypto',de:'Krypto'},desc:{cs:'Kryptoměny',en:'Cryptocurrencies',de:'Kryptowährungen'},price:18000},
+];
+const CURRENCIES=[
+  {code:'CZK',flag:'🇨🇿',name:'Koruna',sym:'Kč',price:0},
+  {code:'EUR',flag:'🇪🇺',name:'Euro',sym:'€',price:2000},
+  {code:'USD',flag:'🇺🇸',name:'Dollar',sym:'$',price:2000},
+  {code:'GBP',flag:'🇬🇧',name:'Pound',sym:'£',price:2000},
+  {code:'CHF',flag:'🇨🇭',name:'Franken',sym:'CHF',price:2000},
+  {code:'PLN',flag:'🇵🇱',name:'Złoty',sym:'zł',price:1000},
+  {code:'HUF',flag:'🇭🇺',name:'Forint',sym:'Ft',price:1000},
+  {code:'RON',flag:'🇷🇴',name:'Leu',sym:'lei',price:1000},
+  {code:'SEK',flag:'🇸🇪',name:'Krona',sym:'kr',price:1000},
+  {code:'NOK',flag:'🇳🇴',name:'Krone',sym:'kr',price:1000},
+  {code:'DKK',flag:'🇩🇰',name:'Krone',sym:'kr',price:1000},
+  {code:'HRK',flag:'🇭🇷',name:'Kuna',sym:'kn',price:1000},
+];
+const DISPLAY_LANGS=[
+  {code:'cs',flag:'🇨🇿',name:'Čeština'},
+  {code:'sk',flag:'🇸🇰',name:'Slovenčina'},
+  {code:'en',flag:'🇬🇧',name:'English'},
+  {code:'de',flag:'🇩🇪',name:'Deutsch'},
+  {code:'pl',flag:'🇵🇱',name:'Polski'},
+  {code:'hu',flag:'🇭🇺',name:'Magyar'},
+  {code:'ro',flag:'🇷🇴',name:'Română'},
+  {code:'fr',flag:'🇫🇷',name:'Français'},
+  {code:'es',flag:'🇪🇸',name:'Español'},
+  {code:'it',flag:'🇮🇹',name:'Italiano'},
+  {code:'ru',flag:'🇷🇺',name:'Русский'},
+  {code:'ua',flag:'🇺🇦',name:'Українська'},
+];
+const MACHINES=[
+  {id:'cash',icon:'💰',name:{cs:'Výměna hotovosti',en:'Cash exchange',de:'Bargeldwechsel'},desc:{cs:'Výměna měn, rozměna',en:'Currency exchange, change',de:'Währungstausch'},price:0},
+  {id:'atm',icon:'🏧',name:{cs:'Výběr hotovosti (ATM)',en:'Cash withdrawal (ATM)',de:'Bargeldabhebung (ATM)'},desc:{cs:'Bankomat, výběr',en:'ATM withdrawal',de:'Geldautomat'},price:25000},
+  {id:'topup',icon:'📲',name:{cs:'Dobíjení kreditu',en:'Credit top-up',de:'Guthaben aufladen'},desc:{cs:'Mobil, MHD karty',en:'Mobile, transport cards',de:'Handy, Fahrkarten'},price:10000},
+  {id:'ticket',icon:'🎟️',name:{cs:'Prodej vstupenek',en:'Ticket sales',de:'Fahrkartenverkauf'},desc:{cs:'Vstupenky, jízdenky',en:'Event & transport tickets',de:'Eintrittskarten'},price:15000},
+  {id:'pos',icon:'🛒',name:{cs:'POS Pokladna',en:'POS Register',de:'Kassensystem'},desc:{cs:'Samoobslužná pokladna',en:'Self-checkout',de:'Selbstbedienungskasse'},price:20000},
+  {id:'info',icon:'ℹ️',name:{cs:'Informační kiosek',en:'Info kiosk',de:'Infokiosk'},desc:{cs:'Interaktivní informace',en:'Interactive info',de:'Interaktive Infos'},price:5000},
+];
+const STICKER_LAYOUTS=[
+  {id:'blank',name:{cs:'Bez polepu',en:'No sticker',de:'Ohne Aufkleber'},price:0},
+  {id:'logo_top',name:{cs:'Logo nahoře',en:'Logo top',de:'Logo oben'},price:3000},
+  {id:'full_wrap',name:{cs:'Celoplošný polep',en:'Full wrap',de:'Vollfolierung'},price:12000},
+  {id:'front_panel',name:{cs:'Přední panel',en:'Front panel',de:'Frontpanel'},price:6000},
+  {id:'sides',name:{cs:'Boční pásy',en:'Side strips',de:'Seitenstreifen'},price:4000},
+  {id:'custom',name:{cs:'Na míru',en:'Custom',de:'Individuell'},price:18000},
 ];
 
-const MATERIALS = [
-  { name:'Standardní', roughness:0.7, metalness:0.1, price:0 },
-  { name:'Matný lak',  roughness:0.9, metalness:0.0, price:5000 },
-  { name:'Lesk',       roughness:0.1, metalness:0.2, price:8000 },
-  { name:'Kov',        roughness:0.3, metalness:0.9, price:12000 },
-];
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let step = 0;
+const STEPS = 7;
+let cfg = {
+  color: COLORS[0], mat: MATS[0],
+  acceptors: new Set(['coin','card']),
+  currencies: new Set(['CZK']),
+  primaryLang: 'cs', displayLangs: new Set(['cs','en']),
+  machine: 'cash',
+  sticker: STICKER_LAYOUTS[0],
+  stickerColor1: '#e8c87a', stickerColor2: '#ffffff',
+  stickerFont: 'sans-serif',
+  meshVis: {},
+};
+const BASE = 45000;
 
-const BASE_PRICE = 45000;
-let state = { color:COLORS[0], material:MATERIALS[0], meshVisibility:{}, price:BASE_PRICE };
-let loadedMeshes = [], configMaterials = [];
+function calcPrice(){
+  let p = BASE;
+  p += cfg.color.price;
+  p += cfg.mat.price;
+  cfg.acceptors.forEach(id=>{ const a=ACCEPTORS.find(x=>x.id===id); if(a) p+=a.price; });
+  cfg.currencies.forEach(c=>{ const x=CURRENCIES.find(y=>y.code===c); if(x) p+=x.price; });
+  p += MACHINES.find(m=>m.id===cfg.machine)?.price||0;
+  p += cfg.sticker.price;
+  return p;
+}
 
-// Three.js setup
+// ═══════════════════════════════════════════════
+// THREE.JS
+// ═══════════════════════════════════════════════
 const canvas = document.getElementById('canvas');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
-renderer.setPixelRatio(window.devicePixelRatio);
+const renderer = new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(devicePixelRatio);
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
@@ -146,192 +356,359 @@ renderer.shadowMap.enabled = true;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0d0d14);
+const camera = new THREE.PerspectiveCamera(45,1,0.01,1000);
 
-const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1000);
-const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(ambient);
-const dir = new THREE.DirectionalLight(0xffffff, 1.2);
-dir.position.set(5,10,5); dir.castShadow = true; scene.add(dir);
-const fill = new THREE.DirectionalLight(0x8ab4f8, 0.4);
-fill.position.set(-5,0,-5); scene.add(fill);
-const rim = new THREE.DirectionalLight(0xe8c87a, 0.3);
-rim.position.set(0,-3,5); scene.add(rim);
-const grid = new THREE.GridHelper(10, 20, 0x222233, 0x111122);
-scene.add(grid);
+scene.add(new THREE.AmbientLight(0xffffff,0.6));
+const dl=new THREE.DirectionalLight(0xffffff,1.2); dl.position.set(5,10,5); dl.castShadow=true; scene.add(dl);
+const fl=new THREE.DirectionalLight(0x8ab4f8,0.4); fl.position.set(-5,0,-5); scene.add(fl);
+const rl=new THREE.DirectionalLight(0xe8c87a,0.3); rl.position.set(0,-3,5); scene.add(rl);
+const grid=new THREE.GridHelper(10,20,0x222233,0x111122); scene.add(grid);
 
-// Orbit
-let isDragging = false, prevMouse = {x:0,y:0};
-let sph = { theta:Math.PI/4, phi:Math.PI/3, radius:5 };
-let target = new THREE.Vector3();
+let sph={theta:Math.PI/4,phi:Math.PI/3,radius:5};
+let camTarget=new THREE.Vector3();
+let drag=false, pm={x:0,y:0};
+canvas.addEventListener('mousedown',e=>{drag=true;pm={x:e.clientX,y:e.clientY}});
+canvas.addEventListener('mouseup',()=>drag=false);
+canvas.addEventListener('mousemove',e=>{if(!drag)return;sph.theta-=(e.clientX-pm.x)*0.005;sph.phi=Math.max(0.1,Math.min(Math.PI-0.1,sph.phi+(e.clientY-pm.y)*0.005));pm={x:e.clientX,y:e.clientY};updateCam()});
+canvas.addEventListener('wheel',e=>{sph.radius=Math.max(0.5,Math.min(20,sph.radius+e.deltaY*0.01));updateCam()});
+let lt2=null;
+canvas.addEventListener('touchstart',e=>{lt2=e.touches[0]});
+canvas.addEventListener('touchmove',e=>{if(!lt2)return;const t=e.touches[0];sph.theta-=(t.clientX-lt2.clientX)*0.005;sph.phi=Math.max(0.1,Math.min(Math.PI-0.1,sph.phi+(t.clientY-lt2.clientY)*0.005));lt2=t;updateCam();e.preventDefault()},{passive:false});
 
-canvas.addEventListener('mousedown', e => { isDragging=true; prevMouse={x:e.clientX,y:e.clientY}; });
-canvas.addEventListener('mouseup', () => isDragging=false);
-canvas.addEventListener('mousemove', e => {
-  if (!isDragging) return;
-  sph.theta -= (e.clientX-prevMouse.x)*0.005;
-  sph.phi = Math.max(0.1, Math.min(Math.PI-0.1, sph.phi+(e.clientY-prevMouse.y)*0.005));
-  prevMouse={x:e.clientX,y:e.clientY}; updateCam();
-});
-canvas.addEventListener('wheel', e => { sph.radius=Math.max(0.5,Math.min(20,sph.radius+e.deltaY*0.01)); updateCam(); });
-
-let lt=null;
-canvas.addEventListener('touchstart', e=>{ lt=e.touches[0]; });
-canvas.addEventListener('touchmove', e=>{
-  if(!lt) return;
-  const t=e.touches[0];
-  sph.theta-=(t.clientX-lt.clientX)*0.005;
-  sph.phi=Math.max(0.1,Math.min(Math.PI-0.1,sph.phi+(t.clientY-lt.clientY)*0.005));
-  lt=t; updateCam(); e.preventDefault();
-},{passive:false});
-
-function updateCam() {
-  camera.position.set(
-    target.x+sph.radius*Math.sin(sph.phi)*Math.sin(sph.theta),
-    target.y+sph.radius*Math.cos(sph.phi),
-    target.z+sph.radius*Math.sin(sph.phi)*Math.cos(sph.theta)
-  );
-  camera.lookAt(target);
+function updateCam(){
+  camera.position.set(camTarget.x+sph.radius*Math.sin(sph.phi)*Math.sin(sph.theta),camTarget.y+sph.radius*Math.cos(sph.phi),camTarget.z+sph.radius*Math.sin(sph.phi)*Math.cos(sph.theta));
+  camera.lookAt(camTarget);
 }
 updateCam();
 
-function resize() {
-  const vp=canvas.parentElement, w=vp.clientWidth, h=vp.clientHeight;
-  renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();
-}
-window.addEventListener('resize', resize); resize();
+function resize(){const vp=canvas.parentElement,w=vp.clientWidth,h=vp.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}
+window.addEventListener('resize',resize);resize();
 
-// GLB loader
-async function loadGLB(url) {
-  setLoading('Stahuji model...');
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    const buf = await res.arrayBuffer();
-    setLoading('Parsuju geometrii...');
+let meshes=[],mats=[];
+async function loadGLB(){
+  try{
+    const r=await fetch('BS-S-0204.glb');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const buf=await r.arrayBuffer();
+    document.getElementById('loading-text').textContent='Parsuju model...';
     parseGLB(buf);
-  } catch(e) { showError(e.message); }
+  }catch(e){document.getElementById('loading').innerHTML=`<div style="background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);border-radius:8px;padding:20px;text-align:center;max-width:320px"><p style="color:#ff6b6b;margin-bottom:8px">⚠️ Chyba načítání</p><p style="font-size:12px;color:rgba(255,255,255,0.5)">${e.message}</p></div>`}
 }
-
-function parseGLB(buffer) {
-  const view = new DataView(buffer);
-  if (view.getUint32(0,true) !== 0x46546C67) { showError('Neplatný GLB soubor'); return; }
-  const jsonLen = view.getUint32(12,true);
-  const gltf = JSON.parse(new TextDecoder().decode(new Uint8Array(buffer,20,jsonLen)));
-  const binData = buffer.slice(20+jsonLen+8);
-  buildScene(gltf, binData);
+function parseGLB(buf){
+  const dv=new DataView(buf);
+  if(dv.getUint32(0,true)!==0x46546C67){throw new Error('Neplatný GLB')}
+  const jl=dv.getUint32(12,true);
+  const gltf=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,20,jl)));
+  const bin=buf.slice(20+jl+8);
+  buildScene(gltf,bin);
 }
-
-function getAcc(gltf, bin, idx) {
-  const acc=gltf.accessors[idx], bv=gltf.bufferViews[acc.bufferView];
-  const off=(bv.byteOffset||0)+(acc.byteOffset||0);
-  const n={SCALAR:1,VEC2:2,VEC3:3,VEC4:4}[acc.type]||1;
-  const T={5121:Uint8Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[acc.componentType];
-  return new T(bin,off,acc.count*n);
+function getAcc(gltf,bin,i){
+  const a=gltf.accessors[i],bv=gltf.bufferViews[a.bufferView];
+  const off=(bv.byteOffset||0)+(a.byteOffset||0);
+  const n={SCALAR:1,VEC2:2,VEC3:3,VEC4:4}[a.type]||1;
+  const T2={5121:Uint8Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[a.componentType];
+  return new T2(bin,off,a.count*n);
 }
-
-function buildScene(gltf, bin) {
-  if (!gltf.meshes?.length) { showError('Model neobsahuje meshe'); return; }
-  const group = new THREE.Group();
-  loadedMeshes=[]; configMaterials=[];
-
-  gltf.meshes.forEach((mesh,mi) => {
-    const obj = new THREE.Group();
-    obj.name = mesh.name || `Část ${mi+1}`;
-    mesh.primitives.forEach(p => {
-      try {
-        const geo = new THREE.BufferGeometry();
-        if (p.attributes.POSITION!=null) geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(getAcc(gltf,bin,p.attributes.POSITION)),3));
-        if (p.attributes.NORMAL!=null)   geo.setAttribute('normal',   new THREE.BufferAttribute(new Float32Array(getAcc(gltf,bin,p.attributes.NORMAL)),3));
-        if (p.attributes.TEXCOORD_0!=null) geo.setAttribute('uv',     new THREE.BufferAttribute(new Float32Array(getAcc(gltf,bin,p.attributes.TEXCOORD_0)),2));
-        if (p.indices!=null) geo.setIndex(new THREE.BufferAttribute(new Uint32Array(getAcc(gltf,bin,p.indices)),1));
-        if (!geo.attributes.normal) geo.computeVertexNormals();
-        const mat = new THREE.MeshStandardMaterial({ color:new THREE.Color(state.color.hex), roughness:state.material.roughness, metalness:state.material.metalness });
-        configMaterials.push(mat);
-        const m = new THREE.Mesh(geo,mat); m.castShadow=true; m.receiveShadow=true;
-        obj.add(m);
-      } catch(e) { console.warn(e); }
+function buildScene(gltf,bin){
+  if(!gltf.meshes?.length)return;
+  const grp=new THREE.Group();
+  meshes=[];mats=[];
+  gltf.meshes.forEach((mesh,mi)=>{
+    const obj=new THREE.Group();obj.name=mesh.name||`Část ${mi+1}`;
+    mesh.primitives.forEach(p=>{
+      try{
+        const geo=new THREE.BufferGeometry();
+        if(p.attributes.POSITION!=null)geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(getAcc(gltf,bin,p.attributes.POSITION)),3));
+        if(p.attributes.NORMAL!=null)geo.setAttribute('normal',new THREE.BufferAttribute(new Float32Array(getAcc(gltf,bin,p.attributes.NORMAL)),3));
+        if(p.indices!=null)geo.setIndex(new THREE.BufferAttribute(new Uint32Array(getAcc(gltf,bin,p.indices)),1));
+        if(!geo.attributes.normal)geo.computeVertexNormals();
+        const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(cfg.color.hex),roughness:cfg.mat.price===0?0.7:cfg.mat.price===5000?0.9:cfg.mat.price===8000?0.1:0.3,metalness:cfg.mat.price===12000?0.9:0.1});
+        mats.push(mat);
+        const m=new THREE.Mesh(geo,mat);m.castShadow=true;m.receiveShadow=true;obj.add(m);
+      }catch(e){}
     });
-    group.add(obj); loadedMeshes.push(obj); state.meshVisibility[mi]=true;
+    grp.add(obj);meshes.push(obj);cfg.meshVis[mi]=true;
   });
-
-  const box=new THREE.Box3().setFromObject(group);
-  const center=box.getCenter(new THREE.Vector3());
-  const size=box.getSize(new THREE.Vector3());
-  const scale=2.5/Math.max(size.x,size.y,size.z);
-  group.scale.setScalar(scale);
-  group.position.sub(center.multiplyScalar(scale));
-  const nb=new THREE.Box3().setFromObject(group);
-  grid.position.y=nb.min.y;
-  target.set(0,(nb.min.y+nb.max.y)/2,0);
-  sph.radius=Math.max(size.x,size.y,size.z)*scale*2.5;
-  updateCam();
-  scene.add(group);
+  const box=new THREE.Box3().setFromObject(grp);
+  const ctr=box.getCenter(new THREE.Vector3());
+  const sz=box.getSize(new THREE.Vector3());
+  const sc=2.5/Math.max(sz.x,sz.y,sz.z);
+  grp.scale.setScalar(sc);grp.position.sub(ctr.multiplyScalar(sc));
+  const nb=new THREE.Box3().setFromObject(grp);
+  grid.position.y=nb.min.y;camTarget.set(0,(nb.min.y+nb.max.y)/2,0);
+  sph.radius=Math.max(sz.x,sz.y,sz.z)*sc*2.5;updateCam();
+  scene.add(grp);
   document.getElementById('loading').style.display='none';
-  document.getElementById('model-info').textContent=`${loadedMeshes.length} součástí`;
-  buildUI();
+  document.getElementById('hdr-info').textContent=`${meshes.length} součástí`;
+  renderStep();renderSummary();
 }
-
-function setLoading(t) { document.getElementById('loading').style.display='flex'; document.getElementById('loading-text').textContent=t; }
-function showError(msg) {
-  document.getElementById('loading').innerHTML=`<div class="error-box"><h3>⚠️ Chyba načítání</h3><p>${msg}</p></div>`;
-}
-
-function buildUI() {
-  // Colors
-  const cg=document.getElementById('color-grid'); cg.innerHTML='';
-  COLORS.forEach((c,i)=>{
-    const sw=document.createElement('div');
-    sw.className='color-swatch'+(i===0?' active':'');
-    sw.style.background=c.hex; sw.title=c.name;
-    sw.onclick=()=>{ document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active')); sw.classList.add('active'); state.color=c; document.getElementById('color-label').textContent=c.name+(c.price>0?` (+${c.price.toLocaleString()} Kč)`:''); applyMat(); updateSummary(); };
-    cg.appendChild(sw);
+function applyMat(){
+  mats.forEach(m=>{
+    m.color.set(cfg.color.hex);
+    const mp=cfg.mat.price;
+    m.roughness=mp===0?0.7:mp===5000?0.9:mp===8000?0.1:0.3;
+    m.metalness=mp===12000?0.9:0.1;
+    m.needsUpdate=true;
   });
-
-  // Materials
-  const mt=document.getElementById('mat-tabs'); mt.innerHTML='';
-  MATERIALS.forEach((m,i)=>{
-    const btn=document.createElement('button');
-    btn.className='mat-tab'+(i===0?' active':''); btn.textContent=m.name;
-    btn.onclick=()=>{ document.querySelectorAll('.mat-tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); state.material=m; applyMat(); updateSummary(); };
-    mt.appendChild(btn);
-  });
-
-  // Meshes
-  const ml=document.getElementById('mesh-list'); ml.innerHTML='';
-  loadedMeshes.forEach((mesh,i)=>{
-    const row=document.createElement('div'); row.className='mesh-item';
-    row.innerHTML=`<span class="mesh-name">${mesh.name}</span><button class="toggle on" id="tog-${i}"></button>`;
-    row.querySelector('button').onclick=function(){ this.classList.toggle('on'); mesh.visible=this.classList.contains('on'); };
-    ml.appendChild(row);
-  });
-
-  updateSummary();
 }
 
-function applyMat() {
-  configMaterials.forEach(m=>{ m.color.set(state.color.hex); m.roughness=state.material.roughness; m.metalness=state.material.metalness; m.needsUpdate=true; });
+(function loop(){requestAnimationFrame(loop);renderer.render(scene,camera)})();
+loadGLB();
+
+// ═══════════════════════════════════════════════
+// STEP RENDERING
+// ═══════════════════════════════════════════════
+function renderSteps(){
+  const c=document.getElementById('steps');
+  c.innerHTML=T[uiLang].steps.map((s,i)=>`
+    <button class="step-tab ${i===step?'active':i<step?'done':''}" onclick="goStep(${i})">
+      <span class="step-num">${i<step?'✓':i+1}</span>${s}
+    </button>`).join('');
 }
 
-function updateSummary() {
-  const total=BASE_PRICE+state.color.price+state.material.price; state.price=total;
-  document.getElementById('summary').innerHTML=`
-    <div class="summary-row"><span>Základní cena</span><span class="price-val">${BASE_PRICE.toLocaleString()} Kč</span></div>
-    ${state.color.price>0?`<div class="summary-row"><span>Barva: ${state.color.name}</span><span class="price-val">+${state.color.price.toLocaleString()} Kč</span></div>`:''}
-    ${state.material.price>0?`<div class="summary-row"><span>Materiál: ${state.material.name}</span><span class="price-val">+${state.material.price.toLocaleString()} Kč</span></div>`:''}
-    <div class="summary-row total"><span>Celkem</span><span class="price-val">${total.toLocaleString()} Kč</span></div>`;
+function renderStep(){
+  renderSteps();
+  const p=document.getElementById('panel-content');
+  const steps=[renderColor,renderAcceptors,renderCurrency,renderLangs,renderMachine,renderSticker,renderSummaryStep];
+  p.innerHTML=steps[step]?steps[step]():'';
+  bindStepEvents();
 }
 
-function setView(v) {
-  const r=sph.radius, views={front:[Math.PI,Math.PI/2],side:[Math.PI/2,Math.PI/2],top:[Math.PI/4,0.15],iso:[Math.PI/4,Math.PI/3]};
-  [sph.theta,sph.phi]=views[v]; updateCam();
-}
-function resetCamera() { sph.theta=Math.PI/4; sph.phi=Math.PI/3; updateCam(); }
-function saveConfig() {
-  alert(`✅ Konfigurace uložena!\n\nBarva: ${state.color.name}\nMaterial: ${state.material.name}\nCena: ${state.price.toLocaleString()} Kč`);
+function renderColor(){
+  const matKeys=MATS.map(m=>({key:m.key,label:t('mat_'+m.key),price:m.price}));
+  return `
+  <div class="section-title">${t('color_surface')}</div>
+  <div class="color-grid">${COLORS.map((c,i)=>`<div class="swatch ${cfg.color===c?'active':''}" style="background:${c.hex}" title="${c.name[uiLang]||c.name.cs}" data-ci="${i}"></div>`).join('')}</div>
+  <div class="sel-label" id="clabel">${cfg.color.name[uiLang]||cfg.color.name.cs}${cfg.color.price>0?' (+'+cfg.color.price.toLocaleString()+' Kč)':''}</div>
+  <div class="section-title" style="margin-top:16px">${t('material_type')}</div>
+  <div class="mat-tabs">${MATS.map((m,i)=>`<button class="mat-tab ${cfg.mat===m?'active':''}" data-mi="${i}">${t('mat_'+m.key)}${m.price>0?' +'+m.price.toLocaleString()+' Kč':''}</button>`).join('')}</div>
+  <div class="section-title">${t('components')}</div>
+  <div>${meshes.map((m,i)=>`<div class="mesh-item"><span class="mesh-name">${m.name}</span><button class="toggle ${cfg.meshVis[i]?'on':''}" data-mesh="${i}"></button></div>`).join('')}</div>`;
 }
 
-(function animate(){ requestAnimationFrame(animate); renderer.render(scene,camera); })();
-loadGLB(MODEL_URL);
+function renderAcceptors(){
+  return `<div class="section-title">${t('acceptors')}</div>
+  <div class="opt-grid">${ACCEPTORS.map(a=>`
+    <div class="opt-card ${cfg.acceptors.has(a.id)?'active':''}" data-acc="${a.id}">
+      <div class="icon">${a.icon}</div>
+      <div class="name">${a.name[uiLang]||a.name.cs}</div>
+      <div class="desc">${a.desc[uiLang]||a.desc.cs}</div>
+      <div class="price">+${a.price.toLocaleString()} Kč</div>
+    </div>`).join('')}</div>`;
+}
+
+function renderCurrency(){
+  return `<div class="section-title">${t('currency')}</div>
+  <div class="currency-grid">${CURRENCIES.map(c=>`
+    <div class="currency-item ${cfg.currencies.has(c.code)?'active':''}" data-cur="${c.code}">
+      <span class="flag">${c.flag}</span>
+      <span class="cname">${c.name}</span>
+      <span class="csym">${c.sym}</span>
+      ${c.price>0?`<span style="font-size:9px;color:#e8c87a;margin-left:auto">+${c.price.toLocaleString()}</span>`:''}
+    </div>`).join('')}</div>`;
+}
+
+function renderLangs(){
+  return `<div class="section-title">${t('lang_display')}</div>
+  <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:10px">${t('lang_hint')}</div>
+  <div class="lang-grid">${DISPLAY_LANGS.map(l=>{
+    const isPrimary=cfg.primaryLang===l.code;
+    const isSelected=cfg.displayLangs.has(l.code);
+    return `<div class="lang-card ${isPrimary?'primary-lang':isSelected?'active':''}" data-lang="${l.code}">
+      <span class="lang-flag">${l.flag}</span>
+      <span class="lang-name">${l.name}</span>
+      ${isPrimary?`<span class="lang-badge badge-primary">${t('primary')}</span>`:isSelected?`<span class="lang-badge badge-selected">${t('selected')}</span>`:''}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderMachine(){
+  return `<div class="section-title">${t('machine_type')}</div>
+  <div class="machine-list">${MACHINES.map(m=>`
+    <div class="machine-item ${cfg.machine===m.id?'active':''}" data-mach="${m.id}">
+      <span class="micon">${m.icon}</span>
+      <div class="minfo">
+        <div class="mname">${m.name[uiLang]||m.name.cs}</div>
+        <div class="mdesc">${m.desc[uiLang]||m.desc.cs}</div>
+      </div>
+      <span class="mprice">${m.price>0?'+'+m.price.toLocaleString()+' Kč':'Included'}</span>
+    </div>`).join('')}</div>`;
+}
+
+function renderSticker(){
+  return `<div class="section-title">${t('sticker')}</div>
+  <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:10px">${t('sticker_hint')}</div>
+  <div class="opt-grid" style="grid-template-columns:1fr">${STICKER_LAYOUTS.map(s=>`
+    <div class="opt-card ${cfg.sticker===s?'active':''}" style="text-align:left;display:flex;align-items:center;gap:10px" data-stk="${s.id}">
+      <div style="flex:1"><div class="name">${s.name[uiLang]||s.name.cs}</div></div>
+      <div class="price">${s.price>0?'+'+s.price.toLocaleString()+' Kč':'Zdarma'}</div>
+    </div>`).join('')}</div>
+  ${cfg.sticker.id!=='blank'?`
+  <div class="section-title" style="margin-top:16px">Nastavení polepů</div>
+  <div class="sticker-opts">
+    <div class="sticker-row">
+      <label>Hlavní barva</label>
+      <input type="color" class="color-input" id="sc1" value="${cfg.stickerColor1}">
+      <span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:6px">${cfg.stickerColor1}</span>
+    </div>
+    <div class="sticker-row">
+      <label>Vedlejší barva</label>
+      <input type="color" class="color-input" id="sc2" value="${cfg.stickerColor2}">
+      <span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:6px">${cfg.stickerColor2}</span>
+    </div>
+    <div class="sticker-row">
+      <label>Písmo</label>
+      <select class="sticker-select" id="sfont">
+        <option value="sans-serif" ${cfg.stickerFont==='sans-serif'?'selected':''}>Sans-serif (moderní)</option>
+        <option value="serif" ${cfg.stickerFont==='serif'?'selected':''}>Serif (klasický)</option>
+        <option value="monospace" ${cfg.stickerFont==='monospace'?'selected':''}>Monospace (technický)</option>
+      </select>
+    </div>
+  </div>
+  <div style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.03);border-radius:6px;border:1px solid rgba(255,255,255,0.08)">
+    <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:8px;letter-spacing:1px">NÁHLED</div>
+    <div id="sticker-preview-box" style="height:60px;border-radius:4px;background:linear-gradient(135deg,${cfg.stickerColor1},${cfg.stickerColor2});display:flex;align-items:center;justify-content:center;font-family:${cfg.stickerFont};font-size:18px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.5)">BS KIOSEK</div>
+  </div>`:``}`;
+}
+
+function renderSummaryStep(){
+  const price=calcPrice();
+  const accList=[...cfg.acceptors].map(id=>ACCEPTORS.find(a=>a.id===id)?.name[uiLang]||id).join(', ');
+  const curList=[...cfg.currencies].join(', ');
+  const langList=[...cfg.displayLangs].map(c=>DISPLAY_LANGS.find(l=>l.code===c)?.name||c).join(', ');
+  const mach=MACHINES.find(m=>m.id===cfg.machine);
+  return `
+  <div class="section-title">${t('summary')}</div>
+  <table style="width:100%;font-size:11px;border-collapse:collapse">
+    ${row('Barva',cfg.color.name[uiLang]||cfg.color.name.cs)}
+    ${row('Materiál',t('mat_'+cfg.mat.key))}
+    ${row('Akceptory',accList||'—')}
+    ${row('Měna',curList||'—')}
+    ${row('Jazyky',langList||'—')}
+    ${row('Stroj',mach?.name[uiLang]||mach?.name.cs||'—')}
+    ${row('Polep',cfg.sticker.name[uiLang]||cfg.sticker.name.cs)}
+  </table>
+  <div style="margin-top:16px;padding:12px;background:rgba(232,200,122,0.08);border:1px solid rgba(232,200,122,0.2);border-radius:6px;text-align:center">
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px">Celková cena</div>
+    <div style="font-size:24px;font-weight:700;color:#e8c87a">${price.toLocaleString()} Kč</div>
+  </div>`;
+}
+function row(k,v){return `<tr><td style="padding:5px 0;color:rgba(255,255,255,0.4);width:90px">${k}</td><td style="color:#fff">${v}</td></tr>`;}
+
+function bindStepEvents(){
+  // Color swatches
+  document.querySelectorAll('[data-ci]').forEach(el=>el.addEventListener('click',()=>{
+    cfg.color=COLORS[+el.dataset.ci];applyMat();renderStep();renderSummary();
+  }));
+  // Mat tabs
+  document.querySelectorAll('[data-mi]').forEach(el=>el.addEventListener('click',()=>{
+    cfg.mat=MATS[+el.dataset.mi];applyMat();renderStep();renderSummary();
+  }));
+  // Mesh toggles
+  document.querySelectorAll('[data-mesh]').forEach(el=>el.addEventListener('click',()=>{
+    const i=+el.dataset.mesh;cfg.meshVis[i]=!cfg.meshVis[i];meshes[i].visible=cfg.meshVis[i];el.classList.toggle('on',cfg.meshVis[i]);
+  }));
+  // Acceptors
+  document.querySelectorAll('[data-acc]').forEach(el=>el.addEventListener('click',()=>{
+    const id=el.dataset.acc;cfg.acceptors.has(id)?cfg.acceptors.delete(id):cfg.acceptors.add(id);renderStep();renderSummary();
+  }));
+  // Currency
+  document.querySelectorAll('[data-cur]').forEach(el=>el.addEventListener('click',()=>{
+    const c=el.dataset.cur;cfg.currencies.has(c)?cfg.currencies.delete(c):cfg.currencies.add(c);renderStep();renderSummary();
+  }));
+  // Display langs
+  document.querySelectorAll('[data-lang]').forEach(el=>el.addEventListener('click',()=>{
+    const c=el.dataset.lang;
+    if(cfg.primaryLang===c)return; // can't deselect primary
+    if(cfg.displayLangs.has(c)){
+      if(cfg.displayLangs.size>1)cfg.displayLangs.delete(c);
+    } else {
+      if(cfg.displayLangs.size>=6){alert('Maximálně 6 jazyků!');return;}
+      cfg.displayLangs.add(c);
+    }
+    // double click = set primary
+    el.addEventListener('dblclick',()=>{cfg.primaryLang=c;cfg.displayLangs.add(c);renderStep();},{once:true});
+    renderStep();renderSummary();
+  }));
+  // Machine
+  document.querySelectorAll('[data-mach]').forEach(el=>el.addEventListener('click',()=>{cfg.machine=el.dataset.mach;renderStep();renderSummary()}));
+  // Stickers
+  document.querySelectorAll('[data-stk]').forEach(el=>el.addEventListener('click',()=>{cfg.sticker=STICKER_LAYOUTS.find(s=>s.id===el.dataset.stk);renderStep();renderSummary()}));
+  // Sticker colors
+  const sc1=document.getElementById('sc1');
+  if(sc1)sc1.addEventListener('input',e=>{cfg.stickerColor1=e.target.value;const box=document.getElementById('sticker-preview-box');if(box)box.style.background=`linear-gradient(135deg,${cfg.stickerColor1},${cfg.stickerColor2})`;});
+  const sc2=document.getElementById('sc2');
+  if(sc2)sc2.addEventListener('input',e=>{cfg.stickerColor2=e.target.value;const box=document.getElementById('sticker-preview-box');if(box)box.style.background=`linear-gradient(135deg,${cfg.stickerColor1},${cfg.stickerColor2})`;});
+  const sf=document.getElementById('sfont');
+  if(sf)sf.addEventListener('change',e=>{cfg.stickerFont=e.target.value;const box=document.getElementById('sticker-preview-box');if(box)box.style.fontFamily=cfg.stickerFont;});
+}
+
+function renderSummary(){
+  const price=calcPrice();
+  document.getElementById('summary-panel').innerHTML=`
+    <div class="sum-row"><span>${t('base')}</span><span class="price-val">${BASE.toLocaleString()} Kč</span></div>
+    ${cfg.color.price>0?`<div class="sum-row"><span>${cfg.color.name[uiLang]||cfg.color.name.cs}</span><span class="price-val">+${cfg.color.price.toLocaleString()} Kč</span></div>`:''}
+    ${cfg.mat.price>0?`<div class="sum-row"><span>${t('mat_'+cfg.mat.key)}</span><span class="price-val">+${cfg.mat.price.toLocaleString()} Kč</span></div>`:''}
+    <div class="sum-row total"><span>${t('total')}</span><span class="price-val">${price.toLocaleString()} Kč</span></div>`;
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function goStep(s){step=s;renderStep();renderSummary();updateNavBtns()}
+function nextStep(){if(step<STEPS-1){step++;renderStep();renderSummary();updateNavBtns()}}
+function prevStep(){if(step>0){step--;renderStep();renderSummary();updateNavBtns()}}
+function updateNavBtns(){
+  document.getElementById('btn-prev').style.display=step===0?'none':'block';
+  document.getElementById('btn-next').textContent=step===STEPS-1?t('save'):t('next');
+  document.getElementById('btn-next').onclick=step===STEPS-1?showSummaryModal:nextStep;
+}
+
+// ═══════════════════════════════════════════════
+// CAMERA
+// ═══════════════════════════════════════════════
+function setView(v){
+  const views={front:[Math.PI,Math.PI/2],side:[Math.PI/2,Math.PI/2],top:[Math.PI/4,0.15],iso:[Math.PI/4,Math.PI/3]};
+  [sph.theta,sph.phi]=views[v];updateCam();
+}
+function resetCamera(){sph.theta=Math.PI/4;sph.phi=Math.PI/3;updateCam()}
+
+// ═══════════════════════════════════════════════
+// SUMMARY MODAL
+// ═══════════════════════════════════════════════
+function showSummaryModal(){
+  const price=calcPrice();
+  const accList=[...cfg.acceptors].map(id=>ACCEPTORS.find(a=>a.id===id)).filter(Boolean);
+  const curList=[...cfg.currencies];
+  const langList=[...cfg.displayLangs].map(c=>DISPLAY_LANGS.find(l=>l.code===c)).filter(Boolean);
+  const mach=MACHINES.find(m=>m.id===cfg.machine);
+  document.getElementById('modal-content').innerHTML=`
+    <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:16px">
+      ${mrow('Barva',cfg.color.name[uiLang]||cfg.color.name.cs,cfg.color.price)}
+      ${mrow('Materiál',t('mat_'+cfg.mat.key),cfg.mat.price)}
+      ${mrow('Akceptory',accList.map(a=>a.name[uiLang]||a.name.cs).join(', '),accList.reduce((s,a)=>s+a.price,0))}
+      ${mrow('Měna',curList.join(', '),0)}
+      ${mrow('Jazyky displeje',langList.map(l=>l.name).join(', '),0)}
+      ${mrow('Typ stroje',mach?.name[uiLang]||mach?.name.cs,mach?.price||0)}
+      ${mrow('Polep',cfg.sticker.name[uiLang]||cfg.sticker.name.cs,cfg.sticker.price)}
+    </table>
+    <div style="background:rgba(232,200,122,0.1);border:1px solid rgba(232,200,122,0.3);border-radius:8px;padding:16px;text-align:center">
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px">CELKOVÁ CENA</div>
+      <div style="font-size:28px;font-weight:700;color:#e8c87a">${price.toLocaleString()} Kč</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px">bez DPH</div>
+    </div>`;
+  document.getElementById('modal').style.display='flex';
+}
+function mrow(k,v,p){return `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:8px 0;color:rgba(255,255,255,0.4);width:110px">${k}</td><td style="color:#fff">${v||'—'}</td><td style="color:#e8c87a;text-align:right">${p>0?'+'+p.toLocaleString()+' Kč':''}</td></tr>`}
+
+function downloadConfig(){
+  const price=calcPrice();
+  const txt=`BS KONFIGURÁTOR - SOUHRN\n${'='.repeat(40)}\nDatum: ${new Date().toLocaleDateString('cs-CZ')}\n\nBarva: ${cfg.color.name[uiLang]||cfg.color.name.cs}\nMateriál: ${t('mat_'+cfg.mat.key)}\nAkceptory: ${[...cfg.acceptors].join(', ')}\nMěna: ${[...cfg.currencies].join(', ')}\nJazyky: ${[...cfg.displayLangs].join(', ')}\nTyp stroje: ${cfg.machine}\nPolep: ${cfg.sticker.name[uiLang]||cfg.sticker.name.cs}\n\nCELKOVÁ CENA: ${price.toLocaleString()} Kč (bez DPH)`;
+  const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(txt);a.download='konfigurace-BS.txt';a.click();
+}
+
+// Init
+renderStep();renderSummary();updateNavBtns();
 </script>
 </body>
 </html>
